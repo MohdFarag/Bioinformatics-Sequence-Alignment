@@ -1,4 +1,5 @@
 import flet as ft
+from utilities import *
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
@@ -11,6 +12,8 @@ def main(page: ft.Page):
     RNA = ft.Checkbox(label="RNA", value=False)
     PROTEIN = ft.Checkbox(label="PROTEIN", value=False)
 
+    selected_files = ft.Text()
+
     def pick_files_result(e: ft.FilePickerResultEvent):
         selected_files.value = (
             ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
@@ -18,16 +21,18 @@ def main(page: ft.Page):
         selected_files.update()
 
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
-    selected_files = ft.Text()
 
     page.overlay.append(pick_files_dialog)
 
-  
-
     def btn_click(e):
-        Sequences.controls.append(ft.Text(f"Sequences are :  {Sequence1.value} , {Sequence2.value} "))
-        Sequence1.value = ""
-        Sequence2.value = ""
+        Sequences.controls.clear()
+        Sequences.controls.append(ft.Text(f"Sequence 1 are :  {Sequence1.value} "))
+        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {Sequence1.value} "))
+
+        result1, result2 = global_alignment(Sequence1.value, Sequence2.value)
+
+        Sequences.controls.append(ft.Text(f"Sequence 1 are :  {result1} "))
+        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
         page.update()
 
     page.add(
