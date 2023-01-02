@@ -19,8 +19,8 @@ def main(page: ft.Page):
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
-    match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
-    mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
+    match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
+    mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120)
     gap = ft.TextField(label="GAP",value="1", text_align=ft.TextAlign.CENTER, width=100)
 
 
