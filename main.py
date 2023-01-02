@@ -5,7 +5,7 @@ def main(page: ft.Page):
     page.title = "Sequence Alignment"
 
     Sequence1 = ft.TextField(label="Enter Sequence1", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
+    #Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
 
     Sequences = ft.Column()
     DNA = ft.Checkbox(label="DNA", value=False)
