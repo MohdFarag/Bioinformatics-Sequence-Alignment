@@ -10,20 +10,16 @@ def main(page: ft.Page):
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence1", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
+    Sequence1 = ft.TextField(label="Enter Sequence 1", autofocus=True)
+    Sequence2 = ft.TextField(label="Enter Sequence 2", autofocus=True)
 
     Sequences = ft.Column()
     cg = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
-    # match_text=ft.Text("Match")
-    # dismatch_text=ft.Text("Dismatch")
-    # gap_text=ft.Text("Gap")
-
     match = ft.TextField(label="MATCH",value="0", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
-    dismatch = ft.TextField(label="DISMATCH",value="0", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
+    mismatch = ft.TextField(label="MISMATCH",value="0", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
     gap = ft.TextField(label="GAP",value="0", text_align=ft.TextAlign.CENTER, width=100)
 
 
@@ -41,13 +37,10 @@ def main(page: ft.Page):
 
     def btn_click(e):
         Sequences.controls.clear()
-        Sequences.controls.append(ft.Text(f"Sequence 1 are :  {Sequence1.value} "))
-        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {Sequence2.value} "))
+        result1, result2 = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
 
-        result1, result2 = global_alignment(Sequence1.value, Sequence2.value)
-
-        Sequences.controls.append(ft.Text(f"Sequence 1 are :  {result1} "))
-        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
+        Sequences.controls.append(ft.Text(f"Sequence 1 :  {result1} "))
+        Sequences.controls.append(ft.Text(f"Sequence 2 :  {result2} "))
         page.update()
 
 
@@ -61,14 +54,13 @@ def main(page: ft.Page):
         page.update()
     
 
-    # DISMATCH COUNT
-
-    def dismatch_minus_click(e):
-        dismatch.value = str(int(dismatch.value) - 1)
+    # MISMATCH COUNT
+    def mismatch_minus_click(e):
+        mismatch.value = str(int(mismatch.value) - 1)
         page.update()
 
-    def dismatch_plus_click(e):
-        dismatch.value = str(int(dismatch.value) + 1)
+    def mismatch_plus_click(e):
+        mismatch.value = str(int(mismatch.value) + 1)
         page.update()
     
     # GAP COUNT
@@ -102,9 +94,9 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
 
 
-                 ft.IconButton(ft.icons.REMOVE, on_click=dismatch_minus_click),
-                dismatch,
-                ft.IconButton(ft.icons.ADD, on_click=dismatch_plus_click),
+                 ft.IconButton(ft.icons.REMOVE, on_click=mismatch_minus_click),
+                mismatch,
+                ft.IconButton(ft.icons.ADD, on_click=mismatch_plus_click),
 
 
 
