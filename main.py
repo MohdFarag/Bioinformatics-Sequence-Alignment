@@ -10,16 +10,16 @@ def main(page: ft.Page):
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGAT", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AGCT" ,autofocus=True)
+    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGAT", autofocus=True,filled=True)
+    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AGCT" ,autofocus=True,filled=True)
 
     Sequences = ft.Column()
     cg = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
-    match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
-    mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
+    match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
+    mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120)
     gap = ft.TextField(label="GAP",value="1", text_align=ft.TextAlign.CENTER, width=100)
 
 
@@ -48,7 +48,7 @@ def main(page: ft.Page):
                         width=30,
                         height=30,
                         bgcolor=ft.colors.BLACK87,
-                        border_radius=5,
+                        border_radius=20,
                         content=ft.Text(letter),
                         alignment=ft.alignment.center,
                 )
@@ -64,7 +64,7 @@ def main(page: ft.Page):
                             width=30,
                             height=30,
                             bgcolor=ft.colors.WHITE70,
-                            border_radius=5,
+                            border_radius=20,
                             content=ft.Text(letter2),
                             alignment=ft.alignment.center)
 
