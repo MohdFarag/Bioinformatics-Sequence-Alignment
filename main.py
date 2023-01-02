@@ -5,7 +5,7 @@ def main(page: ft.Page):
     page.title = "Sequence Alignment"
 
     Sequence1 = ft.TextField(label="Enter Sequence1", autofocus=True)
-    #Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
+    Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
 
     Sequences = ft.Column()
     DNA = ft.Checkbox(label="DNA", value=False)
@@ -32,7 +32,7 @@ def main(page: ft.Page):
         result1, result2 = global_alignment(Sequence1.value, Sequence2.value)
 
         Sequences.controls.append(ft.Text(f"Sequence 1 are :  {result1} "))
-        #Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
+        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
         page.update()
 
     page.add(
