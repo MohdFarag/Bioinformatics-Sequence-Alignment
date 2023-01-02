@@ -7,24 +7,33 @@ from time import sleep
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
-    page.theme_mode = "light"
-    page.theme = ft.Theme(color_scheme_seed="blue")
+    page.theme_mode = ft.ThemeMode.DARK
+        
+    #page.padding = 200
+
+    #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-   
+    page.scroll="always"     
+
+    
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGATACCGATACCGATAC", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AAGCTGCTCAGCTCTAAA" ,autofocus=True)
+    Sequence1 = ft.TextField(label="Enter Sequence 1",value="GATTACA", autofocus=True,filled=True)
+    Sequence2 = ft.TextField(label="Enter Sequence 2",value="GTCGACGCA" ,autofocus=True,filled=True)
 
     Sequences = ft.Column()
     cg = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
+
+    # scores
     match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
     mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120)
     gap = ft.TextField(label="GAP",value="-1", text_align=ft.TextAlign.CENTER, width=100)
+    # num of sequences
+    num_sequences=ft.TextField(label="Num of Sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
 
 
     selected_files = ft.Text()
@@ -39,12 +48,32 @@ def main(page: ft.Page):
 
     page.overlay.append(pick_files_dialog)
 
-    def btn_click(e):
+    def global_alignment_btn(e):
         Sequences.controls.clear()
+
+        seq=["A" , "G" , "C" ,"T"]
+        for letter in Sequence1.value :
+            if letter not in seq :
+                Sequence1.error_text="Invalid sequance"
+                page.update()
+                return
+            else:
+                Sequence1.error_text=None
+
+        for letter in Sequence2.value :
+            if letter not in seq  :
+                Sequence2.error_text="Invalid sequance"
+                page.update()
+                return
+            else:
+                Sequence2.error_text=None
         pb = ft.ProgressBar(width=400)
+
+
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         optimal_alignments = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
-        
+
+
         for i in range(0, 101):
             pb.value = i * 0.01
             sleep(0.01)
@@ -95,11 +124,29 @@ def main(page: ft.Page):
                             content=ft.Text(result_2[j],color=ft.colors.BLACK87,size=size),
                             alignment=ft.alignment.center))
 
-                Sequences.controls.append(ft.Row(sequence_1, alignment="center"))
-                Sequences.controls.append(ft.Row(sequence_2, alignment="center"))
-                        
-        page.update()
+                    
+   
+            
+        #page.update()
 
+                Sequences.controls.append(ft.Row(sequence_1))
+                Sequences.controls.append(ft.Row(sequence_2))
+                Sequences.controls.append(ft.Row())
+                Sequences.controls.append(ft.Row())
+                Sequences.controls.append(ft.Row())
+
+
+
+        page.update()
+    
+
+    # local alignment
+    def loca_alignment_btn():
+        return 
+    # CLEAR
+    def clear_alignment():
+        return
+   
 
    # MATCH COUNT
     def match_minus_click(e):
@@ -128,21 +175,53 @@ def main(page: ft.Page):
     def gap_plus_click(e):
         gap.value = str(int(gap.value) + 1)
         page.update()
+    
+    # sequences count
+    def num_sequences_minus_click(e):
+        num_sequences.value = str(int(num_sequences.value) - 1)
+        num_sequences.update()
+
+    def num_sequences_plus_click(e):
+        num_sequences.value = str(int(num_sequences.value) + 1)
+        num_sequences.update()
+
+
+    # select sequences
+    def select_sequance(e):
+        output_text.value = f"selected sequance is :  {sequence_select.value}"
+        page.update()
+    output_text = ft.Text()
+    submit_option_btn = ft.ElevatedButton(text="Select", on_click=select_sequance)
+    sequence_select = ft.Dropdown(label="Choose Sequence",
+        width=200,
+        height=70,
+        options=[
+            ft.dropdown.Option("sequance1"),
+            ft.dropdown.Option("sequance2"),
+            ft.dropdown.Option("sequance3"),
+        ]
+    )
+
+    def select_option(e):
+        output_text.value = f"selected option is :  {option_select.value}"
+        page.update()
+    output_text = ft.Text()
+    submit_btn = ft.ElevatedButton(text="Select", on_click=select_option)
+    option_select = ft.Dropdown(label="Select option",
+        width=200,
+        height=70,
+        options=[
+            ft.dropdown.Option("Enter Sequance"),
+            ft.dropdown.Option("pick file"),
+        ]
+    )
+
 
   
 
 
     page.add(        
-        ft.Row(
-            [
-                ft.ElevatedButton(
-                    "Pick files",
-                    icon=ft.icons.UPLOAD_FILE,
-                    on_click=lambda _: pick_files_dialog.pick_files(
-                        allow_multiple=True)),
-                          selected_files,
-            ]
-        ),
+       
         cg,
         ft.Row(
             [
@@ -162,20 +241,55 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
             ]
             
-        ),
-        ft.Column(
-        [
-        Sequence1,
-        Sequence2,
+        ),ft.Row([option_select,submit_option_btn]),
+        
+        
+        
         ft.Row(
+            [
+                ft.ElevatedButton(
+                    "Pick files",
+                    icon=ft.icons.UPLOAD_FILE,
+                    on_click=lambda _: pick_files_dialog.pick_files(
+                        allow_multiple=True)),
+                          selected_files,
+            ]
+        ),
+         
+        ft.Column
+        (
+            [
+                ft.Row([
+                ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
+                num_sequences,
+                ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)]),
+                Sequence1,
+                Sequence2,
+                
+                ft.Row
+                (
 
-        [
-           ft.ElevatedButton("Global Alignment", on_click=btn_click), 
-           ft.ElevatedButton("Local Alignment", on_click=btn_click),
-        ]
-        ) 
-        ,
-        Sequences])
+                [
+                ft.ElevatedButton("Global Alignment", on_click=global_alignment_btn), 
+                ft.ElevatedButton("Local Alignment", on_click=loca_alignment_btn),
+                ft.ElevatedButton("Clear", on_click=clear_alignment),
+
+
+
+                ft.Column
+                (
+                        [
+                            sequence_select
+                        ]
+                    
+                    ) ,submit_btn
+
+
+                ],
+                ) 
+                ,Sequences
+            ]
+        )
     )
     
 
