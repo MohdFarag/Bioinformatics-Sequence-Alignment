@@ -1,11 +1,14 @@
 import flet as ft
+
 from utilities import *
-from flet import theme
 from math import *
+from time import sleep
+
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
-    page.theme = theme.Theme(color_scheme_seed="red")
+    page.theme_mode = "light"
+    page.theme = ft.Theme(color_scheme_seed="blue")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
    
 
@@ -21,7 +24,7 @@ def main(page: ft.Page):
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
     match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
     mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120)
-    gap = ft.TextField(label="GAP",value="1", text_align=ft.TextAlign.CENTER, width=100)
+    gap = ft.TextField(label="GAP",value="-1", text_align=ft.TextAlign.CENTER, width=100)
 
 
     selected_files = ft.Text()
@@ -37,10 +40,17 @@ def main(page: ft.Page):
     page.overlay.append(pick_files_dialog)
 
     def btn_click(e):
-        optimal_alignments = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
-        Sequences.controls.append(ft.Text("Download..."))
         Sequences.controls.clear()
-        page.update()
+        pb = ft.ProgressBar(width=400)
+        Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
+        optimal_alignments = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        
+        for i in range(0, 101):
+            pb.value = i * 0.01
+            sleep(0.01)
+            page.update()
+
+        Sequences.controls.clear()
 
         max_line_size = 15
         
@@ -73,7 +83,7 @@ def main(page: ft.Page):
                                 alignment=ft.alignment.center))
 
                 for j in range(start_index,end_index):
-                    if result_2[i] == "-":
+                    if result_2[j] == "-":
                         size = 40
                     else:
                         size = 20               
