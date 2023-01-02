@@ -10,17 +10,17 @@ def main(page: ft.Page):
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence 1", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence 2", autofocus=True)
+    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGAT", autofocus=True)
+    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AGCT" ,autofocus=True)
 
     Sequences = ft.Column()
     cg = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
-    match = ft.TextField(label="MATCH",value="0", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
-    mismatch = ft.TextField(label="MISMATCH",value="0", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
-    gap = ft.TextField(label="GAP",value="0", text_align=ft.TextAlign.CENTER, width=100)
+    match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
+    mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
+    gap = ft.TextField(label="GAP",value="1", text_align=ft.TextAlign.CENTER, width=100)
 
 
     selected_files = ft.Text()
@@ -39,8 +39,37 @@ def main(page: ft.Page):
         Sequences.controls.clear()
         result1, result2 = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
 
-        Sequences.controls.append(ft.Text(f"Sequence 1 :  {result1} "))
-        Sequences.controls.append(ft.Text(f"Sequence 2 :  {result2} "))
+        
+
+        for letter in result1:
+            
+             Sequences.controls.append(      
+                ft.Container(
+                        width=30,
+                        height=30,
+                        bgcolor=ft.colors.BLACK87,
+                        border_radius=5,
+                        content=ft.Text(letter),
+                        alignment=ft.alignment.center,
+                )
+
+                       )
+                        
+        for letter2 in result2:
+                
+                Sequences.controls.append(
+                
+                    
+                    ft.Container(
+                            width=30,
+                            height=30,
+                            bgcolor=ft.colors.WHITE70,
+                            border_radius=5,
+                            content=ft.Text(letter2),
+                            alignment=ft.alignment.center)
+
+                        )
+                        
         page.update()
 
 
