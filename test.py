@@ -1,25 +1,4 @@
-#!/usr/bin/env python
 import operator
-import numpy as np
-import os
-
-
-
-def read_fasta_sequences(path: str):
-    try:
-        with open(path, "r", encoding='utf-8-sig') as file:
-            # Read the text from a file
-            sequences = file.read()
-            print(sequences)
-    except Exception as e:
-        if "No such file or directory" in e.__str__():
-            raise Exception("**ERROR** No such file or directory")
-
-    sequences_group = {}
-    for line in sequences:
-        if(line.startswith(">")):
-            key = line
-
 
 def traverse(tree, node, queue, queues):
     if node == (0, 0):
@@ -33,49 +12,6 @@ def traverse(tree, node, queue, queues):
         queue = old_queue
 
 def global_alignment(sequence_1:str, sequence_2:str, match:int=1, mismatch:int=1, gap:int=1):
-    """
-    The Needleman-Wunsch Algorithm
-    ==============================
-    This is a dynamic programming algorithm for finding the optimal alignment of
-    two strings.
-    
-    Arguments
-    -------
-    seq1: first sequence (Must be combination of A,C,G,T)
-    seq2: seconde sequence (Must be combination of A,C,G,T)
-    match: matching score
-    mismatch: mismatching score
-    gap: gapping score
-
-    Returns
-    -------
-    rx: first sequence alignment
-    ry: second sequence alignment
-
-    Example
-    -------
-        >>> x = "GATTACA"
-        >>> y = "GCATGCU"
-        >>> global_alignment(x, y)
-        G-ATTACA
-        GCA-TGCU
-    """
-
-    if type(sequence_1) != str:
-        sequence_1 = "".join(sequence_1)
-    
-    if type(sequence_2) != str:
-        sequence_2 = "".join(sequence_2)
-
-    if type(match) == str:
-        match = int(match)
-
-    if type(mismatch) == str:
-        mismatch = int(mismatch)
-
-    if type(gap) == str:
-        gap = int(gap)
-
     N = len(sequence_1) + 1
     M = len(sequence_2) + 1
 
@@ -163,40 +99,14 @@ def global_alignment(sequence_1:str, sequence_2:str, match:int=1, mismatch:int=1
                 ind_b -= 1
     return optimal
 
-def local_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1):
-    """
-    The Smith-Waterman Algorithm
-    ==============================
-    This is a dynamic programming algorithm for finding the optimal alignment of
-    two strings.
-    
-    Arguments
-    -------
-    seq1: first sequence (Must be combination of A,C,G,T)
-    seq2: second sequence (Must be combination of A,C,G,T)
-    match: matching score
-    mismatch: mismatching score
-    gap: gapping score
+matrix = []
+# parameters
+match = 1
+mismatch = -1
+gap = -1
+# inputs
+sequence_a = "GCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCU"
+sequence_b = "GCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCATGCUGCCUGCATGCU"
 
-    Returns
-    -------
-    rx: first sequence alignment
-    ry: second sequence alignment
-
-    Example
-    -------
-        >>> x = "GATTACA"
-        >>> y = "GCATGCU"
-        >>> global_alignment(x, y)
-        G-ATTACA
-        GCA-TGCU
-    """
-
-    if type(seq1) != str:
-        seq1 = "".join(seq1)
-    
-    if type(seq2) != str:
-        seq2 = "".join(seq2)
-
-    nx = len(seq1)
-    ny = len(seq2)
+result = global_alignment(sequence_a,sequence_b,match,mismatch,gap)
+print(result)

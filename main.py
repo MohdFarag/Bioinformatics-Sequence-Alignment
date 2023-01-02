@@ -1,6 +1,7 @@
 import flet as ft
 from utilities import *
 from flet import theme
+from math import *
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
@@ -10,8 +11,8 @@ def main(page: ft.Page):
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGAT", autofocus=True)
-    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AGCT" ,autofocus=True)
+    Sequence1 = ft.TextField(label="Enter Sequence 1",value="CGATACCGATACCGATAC", autofocus=True)
+    Sequence2 = ft.TextField(label="Enter Sequence 2",value="AAGCTGCTCAGCTCTAAA" ,autofocus=True)
 
     Sequences = ft.Column()
     cg = ft.RadioGroup(content=ft.Row([
@@ -36,39 +37,56 @@ def main(page: ft.Page):
     page.overlay.append(pick_files_dialog)
 
     def btn_click(e):
+        optimal_alignments = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        Sequences.controls.append(ft.Text("Download..."))
         Sequences.controls.clear()
-        result1, result2 = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        page.update()
 
+        max_line_size = 15
         
-
-        for letter in result1:
+        for alignment in optimal_alignments:
+            result_1 = alignment[0]
+            result_2 = alignment[1]
             
-             Sequences.controls.append(      
-                ft.Container(
-                        width=30,
-                        height=30,
-                        bgcolor=ft.colors.BLACK87,
-                        border_radius=5,
-                        content=ft.Text(letter),
-                        alignment=ft.alignment.center,
-                )
+            line_size = min(len(result_1),max_line_size)
+            last_line_mod = len(result_1) % line_size
+            number_of_lines = ceil((len(result_1)/max_line_size))
 
-                       )
-                        
-        for letter2 in result2:
-                
-                Sequences.controls.append(
-                
-                    
-                    ft.Container(
-                            width=30,
-                            height=30,
+            for k in range(number_of_lines):
+                sequence_1 = []
+                sequence_2 = []
+                start_index = k*line_size
+                end_index = (k+1)*line_size 
+                if k == number_of_lines - 1 and k != 0 :
+                    end_index -= line_size - last_line_mod
+                for i in range(start_index,end_index):
+                    if result_1[i] == "-":
+                        size = 40
+                    else:
+                        size = 20
+                    sequence_1.append(ft.Container(
+                                width=50,
+                                height=50,
+                                bgcolor=ft.colors.BLACK87,
+                                border_radius=100,
+                                content=ft.Text(result_1[i],color=ft.colors.WHITE70,size=size),
+                                alignment=ft.alignment.center))
+
+                for j in range(start_index,end_index):
+                    if result_2[i] == "-":
+                        size = 40
+                    else:
+                        size = 20               
+                    sequence_2.append(ft.Container(
+                            width=50,
+                            height=50,
                             bgcolor=ft.colors.WHITE70,
-                            border_radius=5,
-                            content=ft.Text(letter2),
-                            alignment=ft.alignment.center)
+                            border_radius=100,
+                            content=ft.Text(result_2[j],color=ft.colors.BLACK87,size=size),
+                            alignment=ft.alignment.center))
 
-                        )
+                Sequences.controls.append(ft.Row(sequence_1, alignment="center"))
+                Sequences.controls.append(ft.Row(sequence_2, alignment="center"))
                         
         page.update()
 
