@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 import numpy as np
+import os
+
+def read_fasta_sequences(path: str):
+    try:
+        with open(path, "r", encoding='utf-8-sig') as file:
+            # Read the text from a file
+            sequences = file.read()
+            print(sequences)
+    except Exception as e:
+        if "No such file or directory" in e.__str__():
+            raise Exception("**ERROR** No such file or directory")
+
+    sequences_group = {}
+    for line in sequences:
+        if(line.startswith(">")):
+            key = line
 
 def global_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1):
     """
@@ -35,6 +51,15 @@ def global_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1)
     
     if type(seq2) != str:
         seq2 = "".join(seq2)
+
+    if type(match) == str:
+        match = int(match)
+
+    if type(mismatch) == str:
+        mismatch = int(mismatch)
+
+    if type(gap) == str:
+        gap = int(gap)
 
     nx = len(seq1)
     ny = len(seq2)
@@ -90,7 +115,7 @@ def global_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1)
     # Reverse the strings.
     rx = rx[::-1]
     ry = ry[::-1]
-    return "".join(rx), "".join(ry)
+    return rx, ry
 
 def local_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1):
     """
