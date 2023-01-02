@@ -4,6 +4,7 @@ from flet import theme
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
+    page.theme = theme.Theme(color_scheme_seed="red")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
    
 
@@ -78,15 +79,11 @@ def main(page: ft.Page):
     def gap_plus_click(e):
         gap.value = str(int(gap.value) + 1)
         page.update()
-        
-    page.theme = theme.Theme(color_scheme_seed="red")
-    page.update()
+
+  
 
 
-    page.add(
-        
-
-        
+    page.add(        
         ft.Row(
             [
                 ft.ElevatedButton(
