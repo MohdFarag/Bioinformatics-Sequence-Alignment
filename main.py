@@ -32,7 +32,7 @@ def main(page: ft.Page):
         result1, result2 = global_alignment(Sequence1.value, Sequence2.value)
 
         Sequences.controls.append(ft.Text(f"Sequence 1 are :  {result1} "))
-        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
+        #Sequences.controls.append(ft.Text(f"Sequence 2 are :  {result2} "))
         page.update()
 
     page.add(
