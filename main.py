@@ -9,16 +9,17 @@ def main(page: ft.Page):
     Sequence2 = ft.TextField(label="Enter Sequence2", autofocus=True)
 
     Sequences = ft.Column()
-    DNA = ft.Radio(label="DNA", value=False)
-    RNA = ft.Radio(label="RNA", value=False)
-    PROTEIN = ft.Radio(label="PROTEIN", value=False)
-    match_text=ft.Text("Match")
-    dismatch_text=ft.Text("Dismatch")
-    gap_text=ft.Text("Gap")
+    cg = ft.RadioGroup(content=ft.Row([
+    ft.Radio(value="DNA", label="DNA"),
+    ft.Radio(value="RNA", label="RNA"),
+    ft.Radio(value="PROTEIN", label="PROTEIN")]))
+    # match_text=ft.Text("Match")
+    # dismatch_text=ft.Text("Dismatch")
+    # gap_text=ft.Text("Gap")
 
-    match = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=50)
-    dismatch = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=50)
-    gap = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=50)
+    match = ft.TextField(label="MATCH",value="0", text_align=ft.TextAlign.CENTER, width=100,autofocus=True)
+    dismatch = ft.TextField(label="DISMATCH",value="0", text_align=ft.TextAlign.CENTER, width=120,autofocus=True)
+    gap = ft.TextField(label="GAP",value="0", text_align=ft.TextAlign.CENTER, width=100)
 
 
     selected_files = ft.Text()
@@ -85,26 +86,26 @@ def main(page: ft.Page):
                           selected_files,
             ]
         ),
-        ft.Row([DNA,RNA,PROTEIN]),
+        cg,
         ft.Row(
             [
-                match_text,ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
+                ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
                 match,
                 ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
 
 
-                 dismatch_text,ft.IconButton(ft.icons.REMOVE, on_click=dismatch_minus_click),
+                 ft.IconButton(ft.icons.REMOVE, on_click=dismatch_minus_click),
                 dismatch,
                 ft.IconButton(ft.icons.ADD, on_click=dismatch_plus_click),
 
 
 
-                  gap_text,ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
+                  ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
                 gap,
                 ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
 
                 
-            ]  ,alignment=ft.MainAxisAlignment.CENTER,
+            ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             
         ),
         ft.Column(
