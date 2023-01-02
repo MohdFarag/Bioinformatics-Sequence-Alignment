@@ -1,8 +1,12 @@
 import flet as ft
 from utilities import *
+from flet import theme
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
+    page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
+   
+
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
     Sequence1 = ft.TextField(label="Enter Sequence1", autofocus=True)
@@ -74,8 +78,15 @@ def main(page: ft.Page):
     def gap_plus_click(e):
         gap.value = str(int(gap.value) + 1)
         page.update()
+        
+    page.theme = theme.Theme(color_scheme_seed="red")
+    page.update()
+
 
     page.add(
+        
+
+        
         ft.Row(
             [
                 ft.ElevatedButton(
@@ -103,20 +114,25 @@ def main(page: ft.Page):
                   ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
                 gap,
                 ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
-
-                
-            ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            ]
             
         ),
         ft.Column(
         [
         Sequence1,
         Sequence2,
-        ft.ElevatedButton("show Alignment", on_click=btn_click),
-        Sequences]
-        )
+        ft.Row(
+
+        [
+           ft.ElevatedButton("Global Alignment", on_click=btn_click), 
+           ft.ElevatedButton("Local Alignment", on_click=btn_click),
+        ]
+        ) 
+        ,
+        Sequences])
     )
-  
+    
+
 ft.app(target=main)
 #ft.app(target=main, view=ft.WEB_BROWSER)
 
