@@ -90,7 +90,7 @@ def global_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1)
     # Reverse the strings.
     rx = rx[::-1]
     ry = ry[::-1]
-    return rx, ry
+    return "".join(rx), "".join(ry)
 
 def local_alignment(seq1:str, seq2:str, match:int=1, mismatch:int=1, gap:int=1):
     """

@@ -27,7 +27,7 @@ def main(page: ft.Page):
     def btn_click(e):
         Sequences.controls.clear()
         Sequences.controls.append(ft.Text(f"Sequence 1 are :  {Sequence1.value} "))
-        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {Sequence1.value} "))
+        Sequences.controls.append(ft.Text(f"Sequence 2 are :  {Sequence2.value} "))
 
         result1, result2 = global_alignment(Sequence1.value, Sequence2.value)
 
