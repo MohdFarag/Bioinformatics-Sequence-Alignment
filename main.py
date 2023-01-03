@@ -4,6 +4,8 @@ from utilities import *
 from math import *
 from time import sleep
 
+match_matrix = []
+color_matrix = []
 
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
@@ -62,10 +64,7 @@ def main(page: ft.Page):
     num_sequences=ft.TextField(label="Num of Sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
 
     # score
-    score=ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
-
-
-
+    score_output = ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
 
     selected_files = ft.Text()
 
@@ -86,9 +85,11 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_global_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score_result = results["score"]
-        score.value=score_result
-        matching_matrix = results["matrix"]
+        score = results["score"]
+        score_output.value = score
+        global match_matrix, color_matrix
+        match_matrix = results["matrix"]
+        color_matrix = results["color"]
         
         for i in range(0, 101):
             pb.value = i * 0.01
@@ -158,10 +159,12 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_local_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score_result = results["score"]
-        score.value=score_result
+        score = results["score"]
+        score_output.value = score
 
-        matching_matrix = results["matrix"]
+        global match_matrix, color_matrix
+        match_matrix = results["matrix"]
+        color_matrix = results["color"]
         
         for i in range(0, 101):
             pb.value = i * 0.01
@@ -226,7 +229,7 @@ def main(page: ft.Page):
     # Clear Sequences
     def clear_alignments_action(e):
         Sequences.clean()
-        score.value=None
+        score_output.value = None
         page.update()
    
    # Match count
@@ -266,7 +269,6 @@ def main(page: ft.Page):
         num_sequences.value = str(int(num_sequences.value) + 1)
         num_sequences.update()
     
-
     # select sequences
     def select_sequence(e):
         output_text.value = f"selected sequence is:  {sequence_select.value}"
@@ -281,8 +283,11 @@ def main(page: ft.Page):
         ]
     )
 
-    def show_matrix_action():
-
+    def show_matrix_action(e):
+        print(sequence_input_1.value, sequence_input_2.value)
+        print(match_matrix)
+        print(color_matrix)
+        draw_match_matrix(sequence_input_1.value, sequence_input_2.value, match_matrix, color_matrix)
         return
 
     def select_option(e):
@@ -348,10 +353,7 @@ def main(page: ft.Page):
                 sequence_input_2,
                 
                 ft.Row
-                (
-
-                [
-
+                ([
                 global_alignment_btn,
                 local_alignment_btn,
                 clear_alignments_btn,
@@ -363,16 +365,13 @@ def main(page: ft.Page):
                         ]
                     
                 )
-                 ,submit_btn
-
-                ]
-                ) 
-                ,Sequences,ft.Row([score,show_matrix_btn]),
+                ,submit_btn
+                ])
+                ,Sequences,ft.Row([score_output,show_matrix_btn]),
             ]
         )
     )
     
 
 ft.app(target=main)
-#ft.app(target=main, view=ft.WEB_BROWSER)
-
+# ft.app(target=main, view=ft.WEB_BROWSER)
