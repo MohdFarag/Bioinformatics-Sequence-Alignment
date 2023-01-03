@@ -2,7 +2,11 @@
 import numpy as np
 import pandas as pd
 import os
+import matplotlib
 import matplotlib.pyplot as plt
+from Bio.Align.Applications import ClustalOmegaCommandline
+from Bio import AlignIO
+import textwrap
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
@@ -30,13 +34,27 @@ def read_fasta(path: str, concat=False):
             else:
                 sequence = lines[1:-1]
             
-            print(sequence)
-
             sequences_list[lines[0]] = sequence
 
     return sequences_list
 
+def write_fasta(sequences):
+    """
+    Takes a dictionary and writes it to a fasta file
+    Must specify the filename when calling the function
+    """
+
+    output_file_name = open("output.fasta", "w")
+    with open(output_file_name, "w") as outfile:
+        for key, value in sequences.items():
+            outfile.write(key + "\n")
+            outfile.write("\n".join(textwrap.wrap(value, 60)))
+            outfile.write("\n")
+
 def check_sequence(sequence:str, type:str):
+    """
+    Check validity of sequences
+    """
     sequence = sequence.upper() 
     type = type.upper()
     if type == "DNA":
@@ -154,8 +172,7 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
             match_matrix[i,j] = max(arr)
 
     score = match_matrix[-1,-1]
-    print(score)
-    print(match_matrix)
+    
     # STEP 3: Backtracing
     alignments = []
     i, j = match_matrix.shape[0] - 1, match_matrix.shape[1] - 1
@@ -190,7 +207,7 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
             alignment_b.append(letter_b)
             j -= 1
 
-
+    color_matrix[i,j] = 1
     alignments.append([alignment_a[::-1],alignment_b[::-1]])
 
     results = {
@@ -320,7 +337,7 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
             j -= 1
         else:
             break
-
+    color_matrix[i,j] = 1
     alignments.append([alignment_a[::-1],alignment_b[::-1]])
 
     results = {
@@ -333,8 +350,7 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
     return results
 
 def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, color_matrix:np.ndarray):
-    N = len(sequence_a) + 1
-    M = len(sequence_b) + 1
+    n, m = len(sequence_a) + 1, len(sequence_b) + 1
     
     # Draw the map
     fig, ax = plt.subplots()
@@ -342,18 +358,33 @@ def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, c
     ax.axis('off')
     ax.axis('tight')
 
-    df = pd.DataFrame(match_matrix, columns=list(" " + sequence_a))
+    df = pd.DataFrame(match_matrix, columns=list(" " + sequence_b))
+    colors = []
+    for i in range(0,m):
+        color_row = []
+        for j in range(0,n):
+            if color_matrix[i,j] == 0:
+                color_row.append("w")
+            else:
+                color_row.append("g")
 
-    color_matrix[color_matrix==0] = "w"
-    color_matrix[color_matrix==1] = "g"
+        colors.append(color_row)
+    
+    colors = np.array(colors)
+    print(colors.shape)
 
     # Color the map
     ax.table(cellText=df.values, colLabels=df.columns,
-            loc='center', rowLabels=" " + sequence_b,
-            cellColours=color_matrix, colWidths=[0.05 for x in df.columns], )
+            loc='center', rowLabels=" " + sequence_a,
+            cellColours=colors, colWidths=[0.05 for x in df.columns])
 
     fig.tight_layout()
     plt.show()
 
-def multiple_sequence_alignment(sequences:list, match:int=1, mismatch:int=0, gap:int=-1):
-    pass
+def multiple_sequence_alignment(path:str, match:int=1, mismatch:int=0, gap:int=-1):
+    output_location = r"./src/out_file.fasta"
+    clustalomega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True, match=1, mismatch=0, gap=1)
+    clustalomega_cline()
+    alignment = AlignIO.read("output_location", "clustalo")
+    
+    return alignment

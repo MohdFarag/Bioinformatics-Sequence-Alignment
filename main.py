@@ -390,7 +390,7 @@ def main(page: ft.Page):
                  ft.VerticalDivider(),
                 ft.Container(ft.Column([MatplotlibChart(fig,expand=True)])
 ,
-                    alignment=ft.alignment.bottom_left,
+                    alignment=ft.alignment.center,
                     expand=True,
                 ),
         
