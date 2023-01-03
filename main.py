@@ -97,7 +97,7 @@ def main(page: ft.Page):
 
         Sequences.controls.clear()
 
-        max_line_size = 15
+        max_line_size = 20
         
         for alignment in optimal_alignments:
             result_1 = alignment[0]
@@ -170,7 +170,7 @@ def main(page: ft.Page):
 
         Sequences.controls.clear()
 
-        max_line_size = 15
+        max_line_size = 20
         
         for alignment in optimal_alignments:
             result_1 = alignment[0]
