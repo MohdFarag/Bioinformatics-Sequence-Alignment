@@ -3,19 +3,34 @@ import flet as ft
 from utilities import *
 from math import *
 from time import sleep
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+
+from flet import Page
+from flet.matplotlib_chart import MatplotlibChart
 
 
+
+
+matplotlib.use("svg")
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
     page.theme_mode = ft.ThemeMode.DARK
-        
+
     #page.padding = 200
 
     #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    # page.scroll="always"        
+    #page.scroll="always"        
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
+
+
+    # matrix plot
+    fig, ax = plt.subplots()
+
+    # produce a legend with the unique colors from the scatter
 
     def check_sequence_1(e):
         if not check_sequence(sequence_input_1.value, sequence_type.value):
@@ -305,12 +320,11 @@ def main(page: ft.Page):
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
     show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=show_matrix_action)
 
-
-    page.add(        
-       
+    
+    page.add(  
         sequence_type,
         ft.Row(
-            [
+            [   
                 ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
                 match,
                 ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
@@ -367,12 +381,21 @@ def main(page: ft.Page):
 
                 ]
                 ) 
-                ,Sequences,ft.Row([score,show_matrix_btn]),
+                ,Sequences,
+                ft.Row([score,show_matrix_btn])
             ]
-        )
-    )
+            
+        ),
     
-
+                 ft.VerticalDivider(),
+                ft.Container(ft.Column([MatplotlibChart(fig,expand=True)])
+,
+                    alignment=ft.alignment.bottom_left,
+                    expand=True,
+                ),
+        
+        )
+    
 ft.app(target=main)
 #ft.app(target=main, view=ft.WEB_BROWSER)
 
