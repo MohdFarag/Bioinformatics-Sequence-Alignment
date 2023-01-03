@@ -61,6 +61,11 @@ def main(page: ft.Page):
     # num of sequences
     num_sequences=ft.TextField(label="Num of Sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
 
+    # score
+    score=ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+
+
+
 
     selected_files = ft.Text()
 
@@ -81,7 +86,8 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_global_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score = results["score"]
+        score_result = results["score"]
+        score.value=score_result
         matching_matrix = results["matrix"]
         
         for i in range(0, 101):
@@ -152,7 +158,9 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_local_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score = results["score"]
+        score_result = results["score"]
+        score.value=score_result
+
         matching_matrix = results["matrix"]
         
         for i in range(0, 101):
@@ -218,6 +226,7 @@ def main(page: ft.Page):
     # Clear Sequences
     def clear_alignments_action(e):
         Sequences.clean()
+        score.value=None
         page.update()
    
    # Match count
@@ -256,7 +265,7 @@ def main(page: ft.Page):
     def num_sequences_plus_click(e):
         num_sequences.value = str(int(num_sequences.value) + 1)
         num_sequences.update()
-
+    
 
     # select sequences
     def select_sequence(e):
@@ -271,6 +280,10 @@ def main(page: ft.Page):
             ft.dropdown.Option("sequence 1")
         ]
     )
+
+    def show_matrix_action():
+
+        return
 
     def select_option(e):
         output_text.value = f"selected option is :  {option_select.value}"
@@ -290,6 +303,8 @@ def main(page: ft.Page):
     global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
     local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
+    show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=show_matrix_action)
+
 
     page.add(        
        
@@ -347,12 +362,12 @@ def main(page: ft.Page):
                             sequence_select
                         ]
                     
-                    ) ,submit_btn
+                )
+                 ,submit_btn
 
-
-                ],
+                ]
                 ) 
-                ,Sequences
+                ,Sequences,ft.Row([score,show_matrix_btn]),
             ]
         )
     )
