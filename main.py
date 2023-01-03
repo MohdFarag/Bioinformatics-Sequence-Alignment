@@ -43,7 +43,10 @@ def main(page: ft.Page):
         Sequences.controls.clear()
         pb = ft.ProgressBar(width=400)
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
-        optimal_alignments = global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        results = pairwise_global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        optimal_alignments = results["alignments"]
+        score = results["score"]
+        matching_matrix = results["matrix"]
         
         for i in range(0, 101):
             pb.value = i * 0.01
@@ -74,6 +77,7 @@ def main(page: ft.Page):
                         size = 40
                     else:
                         size = 20
+
                     sequence_1.append(ft.Container(
                                 width=50,
                                 height=50,
@@ -87,6 +91,7 @@ def main(page: ft.Page):
                         size = 40
                     else:
                         size = 20               
+                    
                     sequence_2.append(ft.Container(
                             width=50,
                             height=50,
@@ -129,9 +134,6 @@ def main(page: ft.Page):
         gap.value = str(int(gap.value) + 1)
         page.update()
 
-  
-
-
     page.add(        
         ft.Row(
             [
@@ -150,12 +152,9 @@ def main(page: ft.Page):
                 match,
                 ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
 
-
                  ft.IconButton(ft.icons.REMOVE, on_click=mismatch_minus_click),
                 mismatch,
                 ft.IconButton(ft.icons.ADD, on_click=mismatch_plus_click),
-
-
 
                   ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
                 gap,
