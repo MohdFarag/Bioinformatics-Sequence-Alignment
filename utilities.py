@@ -1,26 +1,38 @@
 #!/usr/bin/env python
-import operator
 import numpy as np
 import os
 
-LETTERS_OF_DNA = ['A','G','T','C','N']
-LETTERS_OF_RNA = ['A','G','U','C','N']
+# Reference of sequences letters: 
+# http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
+LETTERS_OF_DNA = ['A','G','T','C','N','X']
+LETTERS_OF_RNA = ['A','G','U','C','N','X']
 LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
 
-def read_fasta_sequences(path: str):
+# Read fasta file
+def read_fasta(path: str, concat=False):
     try:
         with open(path, "r", encoding='utf-8-sig') as file:
             # Read the text from a file
             sequences = file.read()
-            print(sequences)
+            sequences = sequences.split(">")
     except Exception as e:
         if "No such file or directory" in e.__str__():
             raise Exception("**ERROR** No such file or directory")
 
-    sequences_group = {}
-    for line in sequences:
-        if(line.startswith(">")):
-            key = line
+    sequences_list = {}
+    for all_sequence in sequences:
+        lines = all_sequence.splitlines()
+        if len(lines) != 0:
+            if concat == True:
+                sequence = "".join(lines[1:-1])
+            else:
+                sequence = lines[1:-1]
+            
+            print(sequence)
+
+            sequences_list[lines[0]] = sequence
+
+    return sequences_list
 
 def check_sequence(sequence:str, type:str):
     sequence = sequence.upper() 
@@ -312,3 +324,6 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
     }
 
     return results
+
+def multiple_sequence_alignment(sequences:list, match:int=1, mismatch:int=0, gap:int=-1):
+    pass

@@ -13,9 +13,7 @@ def main(page: ft.Page):
 
     #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    page.scroll="always"     
-
-    
+    page.scroll="always"        
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
