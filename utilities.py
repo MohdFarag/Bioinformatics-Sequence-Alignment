@@ -4,8 +4,8 @@ import numpy as np
 import os
 
 LETTERS_OF_DNA = ['A','G','T','C','N']
-LETTERS_OF_RNA = ['A','G','T','C','N']
-LETTERS_OF_PROTEIN = ['A','G','T','C','N']
+LETTERS_OF_RNA = ['A','G','U','C','N']
+LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
 
 def read_fasta_sequences(path: str):
     try:
