@@ -13,7 +13,7 @@ def main(page: ft.Page):
 
     #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    page.scroll="always"        
+    # page.scroll="always"        
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
@@ -46,7 +46,6 @@ def main(page: ft.Page):
     sequence_input_1 = ft.TextField(label="Enter Sequence 1",value="GATTACA", autofocus=True,filled=True,on_change=check_sequence_1)
     sequence_input_2 = ft.TextField(label="Enter Sequence 2",value="GTCGACGCA" ,autofocus=True,filled=True,on_change=check_sequence_2)
 
-
     Sequences = ft.Column()
     sequence_type = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
@@ -54,11 +53,11 @@ def main(page: ft.Page):
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
     sequence_type.value = "DNA"
 
-
     # scores
     match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
     mismatch = ft.TextField(label="MISMATCH",value="-2", text_align=ft.TextAlign.CENTER, width=120)
     gap = ft.TextField(label="GAP",value="-1", text_align=ft.TextAlign.CENTER, width=100)
+
     # num of sequences
     num_sequences=ft.TextField(label="Num of Sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
 
@@ -77,21 +76,6 @@ def main(page: ft.Page):
 
     def global_alignment_action(e):
         Sequences.controls.clear()
-        if not check_sequence(sequence_input_1.value, sequence_type.value):
-            sequence_input_1.error_text = f"Invalid {sequence_type.value} Sequence"
-            page.update()
-            return
-        else:
-            sequence_input_1.error_text = None
-
-        
-        if not check_sequence(sequence_input_2.value, sequence_type.value):
-            sequence_input_2.error_text = f"Invalid {sequence_type.value} Sequence"
-            page.update()
-            return
-        else:
-            sequence_input_2.error_text = None
-
         pb = ft.ProgressBar(width=400)
 
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
@@ -162,11 +146,79 @@ def main(page: ft.Page):
     
     # Local alignment
     def local_alignment_action(e):
-        return 
+        Sequences.controls.clear()
+        pb = ft.ProgressBar(width=400)
+
+        Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
+        results = pairwise_local_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
+        optimal_alignments = results["alignments"]
+        score = results["score"]
+        matching_matrix = results["matrix"]
+        
+        for i in range(0, 101):
+            pb.value = i * 0.01
+            sleep(0.01)
+            page.update()
+
+        Sequences.controls.clear()
+
+        max_line_size = 15
+        
+        for alignment in optimal_alignments:
+            result_1 = alignment[0]
+            result_2 = alignment[1]
+            
+            line_size = min(len(result_1),max_line_size)
+            last_line_mod = len(result_1) % line_size
+            number_of_lines = ceil((len(result_1)/max_line_size))
+
+            for k in range(number_of_lines):
+                sequence_1 = []
+                sequence_2 = []
+                start_index = k*line_size
+                end_index = (k+1)*line_size 
+                if k == number_of_lines - 1 and k != 0 :
+                    end_index -= line_size - last_line_mod
+                for i in range(start_index,end_index):
+                    if result_1[i] == "-":
+                        size = 40
+                    else:
+                        size = 20
+
+                    sequence_1.append(ft.Container(
+                                width=50,
+                                height=50,
+                                bgcolor=ft.colors.BLACK87,
+                                border_radius=100,
+                                content=ft.Text(result_1[i],color=ft.colors.WHITE70,size=size),
+                                alignment=ft.alignment.center))
+
+                for j in range(start_index,end_index):
+                    if result_2[j] == "-":
+                        size = 40
+                    else:
+                        size = 20               
+                    
+                    sequence_2.append(ft.Container(
+                            width=50,
+                            height=50,
+                            bgcolor=ft.colors.WHITE70,
+                            border_radius=100,
+                            content=ft.Text(result_2[j],color=ft.colors.BLACK87,size=size),
+                            alignment=ft.alignment.center))
+           
+                Sequences.controls.append(ft.Row(sequence_1))
+                Sequences.controls.append(ft.Row(sequence_2))
+                Sequences.controls.append(ft.Row())
+                Sequences.controls.append(ft.Row())
+                Sequences.controls.append(ft.Row())
+
+        page.update() 
 
     # Clear Sequences
     def clear_alignments_action(e):
-        return
+        Sequences.clean()
+        page.update()
    
    # Match count
     def match_minus_click(e):
