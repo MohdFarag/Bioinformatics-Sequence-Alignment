@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
+import pandas as pd
 import os
+import matplotlib.pyplot as plt
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
@@ -87,6 +89,7 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
     results: dict
     results = {
         "matrix":matching matrix,
+        "color: color matrix,
         "score": score,
         "alignments": alignments
     }
@@ -129,6 +132,8 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
 
     # STEP 1: Initialization of matrix
     match_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
+    color_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
+    
     for i in range (1,len(sequence_a)+1):
         match_matrix[i,0] = match_matrix[i-1,0] + gap
 
@@ -161,8 +166,8 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
         letter_a = sequence_a[i-1]
         letter_b = sequence_b[j-1]
         curr = match_matrix[i,j]
-        
-        
+        color_matrix[i,j] = 1
+
         corner = match_matrix[i-1,j-1]
         top = match_matrix[i-1,j]
         left = match_matrix[i,j-1]
@@ -190,6 +195,7 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
 
     results = {
         "matrix":match_matrix,
+        "color": color_matrix,
         "score": score,
         "alignments": alignments
     }
@@ -216,6 +222,7 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
     results: dict
     results = {
         "matrix":matching matrix,
+        "color: color matrix,
         "score": score,
         "alignments": alignments
     }
@@ -258,6 +265,7 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
 
     # STEP 1: Initialization of matrix
     match_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
+    color_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
 
     # STEP 2: Filling to the matrix
     for i in range(1,len(sequence_a)+1):
@@ -271,21 +279,19 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
             arr.append(match_matrix[i-1,j] + gap)
             arr.append(match_matrix[i,j-1] + gap)
             match_matrix[i,j] = max(arr)
-
-    score = match_matrix[-1,-1]
+    score = match_matrix.max()
 
     # STEP 3: Backtracing
     alignments = []
 
     index_max = np.unravel_index(np.argmax(match_matrix, axis=None), match_matrix.shape)
-    print(index_max)
     i, j = index_max[0], index_max[1]
     alignment_a = []
     alignment_b = []
     
     while match_matrix[i,j] != 0:
         curr = match_matrix[i,j]
-        print(curr)
+        color_matrix[i,j] = 1
 
         corner = match_matrix[i-1,j-1]
         top = match_matrix[i-1,j]
@@ -319,11 +325,35 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
 
     results = {
         "matrix":match_matrix,
+        "color": color_matrix,
         "score": score,
         "alignments": alignments
     }
 
     return results
+
+def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, color_matrix:np.ndarray):
+    N = len(sequence_a) + 1
+    M = len(sequence_b) + 1
+    
+    # Draw the map
+    fig, ax = plt.subplots()
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+
+    df = pd.DataFrame(match_matrix, columns=list(" " + sequence_a))
+
+    color_matrix[color_matrix==0] = "w"
+    color_matrix[color_matrix==1] = "g"
+
+    # Color the map
+    ax.table(cellText=df.values, colLabels=df.columns,
+            loc='center', rowLabels=" " + sequence_b,
+            cellColours=color_matrix, colWidths=[0.05 for x in df.columns], )
+
+    fig.tight_layout()
+    plt.show()
 
 def multiple_sequence_alignment(sequences:list, match:int=1, mismatch:int=0, gap:int=-1):
     pass
