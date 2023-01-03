@@ -166,6 +166,9 @@ def main(page: ft.Page):
 
     # Clear Sequences
     def clear_alignments_action(e):
+        Sequences.controls.append(ft.Row())
+        Sequences.controls.append(ft.Row())
+
         return
    
    # Match count
