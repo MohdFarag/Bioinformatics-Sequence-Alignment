@@ -19,14 +19,43 @@ def main(page: ft.Page):
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
-    Sequence1 = ft.TextField(label="Enter Sequence 1",value="GATTACA", autofocus=True,filled=True)
-    Sequence2 = ft.TextField(label="Enter Sequence 2",value="GTCGACGCA" ,autofocus=True,filled=True)
+    def check_sequence_1(e):
+        if not check_sequence(sequence_input_1.value, sequence_type.value):
+            sequence_input_1.error_text = f"Invalid {sequence_type.value} Sequence"
+            global_alignment_btn.disabled = True
+            local_alignment_btn.disabled = True
+            page.update()
+            return
+
+        global_alignment_btn.disabled = False
+        local_alignment_btn.disabled = False
+        sequence_input_1.error_text = None
+        page.update()
+
+    def check_sequence_2(e):
+        if not check_sequence(sequence_input_2.value, sequence_type.value):
+            sequence_input_2.error_text = f"Invalid {sequence_type.value} Sequence"
+            global_alignment_btn.disabled = True
+            local_alignment_btn.disabled = True
+            page.update()
+            return
+
+        global_alignment_btn.disabled = False
+        local_alignment_btn.disabled = False
+        sequence_input_2.error_text = None
+        page.update()
+
+    sequence_input_1 = ft.TextField(label="Enter Sequence 1",value="GATTACA", autofocus=True,filled=True,on_change=check_sequence_1)
+    sequence_input_2 = ft.TextField(label="Enter Sequence 2",value="GTCGACGCA" ,autofocus=True,filled=True,on_change=check_sequence_2)
+
 
     Sequences = ft.Column()
-    cg = ft.RadioGroup(content=ft.Row([
+    sequence_type = ft.RadioGroup(content=ft.Row([
     ft.Radio(value="DNA", label="DNA"),
     ft.Radio(value="RNA", label="RNA"),
     ft.Radio(value="PROTEIN", label="PROTEIN")]))
+    sequence_type.value = "DNA"
+
 
     # scores
     match = ft.TextField(label="MATCH",value="2", text_align=ft.TextAlign.CENTER, width=100)
@@ -48,30 +77,27 @@ def main(page: ft.Page):
 
     page.overlay.append(pick_files_dialog)
 
-    def global_alignment_btn(e):
+    def global_alignment_action(e):
         Sequences.controls.clear()
+        if not check_sequence(sequence_input_1.value, sequence_type.value):
+            sequence_input_1.error_text = f"Invalid {sequence_type.value} Sequence"
+            page.update()
+            return
+        else:
+            sequence_input_1.error_text = None
 
-        seq=["A" , "G" , "C" ,"T"]
-        for letter in Sequence1.value :
-            if letter not in seq :
-                Sequence1.error_text="Invalid sequance"
-                page.update()
-                return
-            else:
-                Sequence1.error_text=None
+        
+        if not check_sequence(sequence_input_2.value, sequence_type.value):
+            sequence_input_2.error_text = f"Invalid {sequence_type.value} Sequence"
+            page.update()
+            return
+        else:
+            sequence_input_2.error_text = None
 
-        for letter in Sequence2.value :
-            if letter not in seq  :
-                Sequence2.error_text="Invalid sequance"
-                page.update()
-                return
-            else:
-                Sequence2.error_text=None
         pb = ft.ProgressBar(width=400)
 
-
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
-        results = pairwise_global_alignment(Sequence1.value, Sequence2.value, match.value, mismatch.value, gap.value)
+        results = pairwise_global_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
         score = results["score"]
         matching_matrix = results["matrix"]
@@ -127,32 +153,24 @@ def main(page: ft.Page):
                             border_radius=100,
                             content=ft.Text(result_2[j],color=ft.colors.BLACK87,size=size),
                             alignment=ft.alignment.center))
-
-                    
-   
-            
-        #page.update()
-
+           
                 Sequences.controls.append(ft.Row(sequence_1))
                 Sequences.controls.append(ft.Row(sequence_2))
                 Sequences.controls.append(ft.Row())
                 Sequences.controls.append(ft.Row())
                 Sequences.controls.append(ft.Row())
 
-
-
         page.update()
     
-
-    # local alignment
-    def loca_alignment_btn():
+    # Local alignment
+    def local_alignment_action(e):
         return 
-    # CLEAR
-    def clear_alignment():
+
+    # Clear Sequences
+    def clear_alignments_action(e):
         return
    
-
-   # MATCH COUNT
+   # Match count
     def match_minus_click(e):
         match.value = str(int(match.value) - 1)
         page.update()
@@ -191,18 +209,16 @@ def main(page: ft.Page):
 
 
     # select sequences
-    def select_sequance(e):
-        output_text.value = f"selected sequance is :  {sequence_select.value}"
+    def select_sequence(e):
+        output_text.value = f"selected sequence is:  {sequence_select.value}"
         page.update()
     output_text = ft.Text()
-    submit_option_btn = ft.ElevatedButton(text="Select", on_click=select_sequance)
+    submit_option_btn = ft.ElevatedButton(text="Select", on_click=select_sequence)
     sequence_select = ft.Dropdown(label="Choose Sequence",
         width=200,
         height=70,
         options=[
-            ft.dropdown.Option("sequance1"),
-            ft.dropdown.Option("sequance2"),
-            ft.dropdown.Option("sequance3"),
+            ft.dropdown.Option("sequence 1")
         ]
     )
 
@@ -215,15 +231,19 @@ def main(page: ft.Page):
         width=200,
         height=70,
         options=[
-            ft.dropdown.Option("Enter Sequance"),
+            ft.dropdown.Option("Enter Sequence"),
             ft.dropdown.Option("pick file"),
         ]
     )
 
 
+    global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
+    local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
+    clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
+
     page.add(        
        
-        cg,
+        sequence_type,
         ft.Row(
             [
                 ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
@@ -240,9 +260,7 @@ def main(page: ft.Page):
             ]
             
         ),ft.Row([option_select,submit_option_btn]),
-        
-        
-        
+
         ft.Row(
             [
                 ft.ElevatedButton(
@@ -261,18 +279,17 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
                 num_sequences,
                 ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)]),
-                Sequence1,
-                Sequence2,
+                sequence_input_1,
+                sequence_input_2,
                 
                 ft.Row
                 (
 
                 [
-                ft.ElevatedButton("Global Alignment", on_click=global_alignment_btn), 
-                ft.ElevatedButton("Local Alignment", on_click=loca_alignment_btn),
-                ft.ElevatedButton("Clear", on_click=clear_alignment),
 
-
+                global_alignment_btn,
+                local_alignment_btn,
+                clear_alignments_btn,
 
                 ft.Column
                 (

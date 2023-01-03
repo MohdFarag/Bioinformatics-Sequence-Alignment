@@ -22,6 +22,18 @@ def read_fasta_sequences(path: str):
         if(line.startswith(">")):
             key = line
 
+def check_sequence(sequence:str, type:str):
+    sequence = sequence.upper() 
+    type = type.upper()
+    if type == "DNA":
+        return is_dna(sequence)
+    elif type == "RNA":
+        return is_rna(sequence)
+    elif type == "PROTEIN":
+        return is_protein(sequence)
+
+    return False
+
 def is_dna(sequence):
     # Valid letters in DNA sequence
     for letter in sequence:
@@ -66,7 +78,7 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
         "score": score,
         "alignments": alignments
     }
-    
+
     Example
     -------
         >>> x = "GATTACA"
