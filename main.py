@@ -55,8 +55,26 @@ def main(page: ft.Page):
         sequence_input_2.error_text = None
         page.update()
 
+
+    def add_sequence(e):
+        if not check_sequence(sequence_input_1.value, sequence_type.value):
+            sequence_input_1.error_text = f"Invalid {sequence_type.value} Sequence"
+            global_alignment_btn.disabled = True
+            local_alignment_btn.disabled = True
+            msa_btn.disabled = True
+
+            page.update()
+            return
+
+        global_alignment_btn.disabled = False
+        local_alignment_btn.disabled = False
+        msa_btn.disabled = False
+        sequence_input_1.error_text = None
+        page.update()
+
     sequence_input_1 = ft.TextField(label="Enter Sequence 1",value="AGCAGA", max_length=40, autofocus=True,filled=True,on_change=check_sequence_1)
     sequence_input_2 = ft.TextField(label="Enter Sequence 2",value="AGCAGAAAAAG", max_length=40 ,autofocus=True,filled=True,on_change=check_sequence_2)
+    sequence_input_add = ft.TextField(label="Enter Sequence ", max_length=40, autofocus=True,filled=True,on_change=add_sequence)
 
     sequences_alignments_layout = ft.Column()
     sequence_type = ft.RadioGroup(
@@ -72,10 +90,16 @@ def main(page: ft.Page):
     gap = ft.TextField(label="GAP",value="-1", text_align=ft.TextAlign.CENTER, width=100)
 
     # Number of sequences
-    num_sequences = ft.TextField(label="Number of sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
+    num_sequences = ft.TextField(label="Number of sequences",value="2", text_align=ft.TextAlign.CENTER, width=200)
 
     # Score output
     score_output = ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+
+    # metrices
+    sum_of_pairs = ft.TextField(label="sum of pairs",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+    mutal_information = ft.TextField(label="Mutal information",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+    percent_identity = ft.TextField(label="percent identity",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+
 
     selected_files = ft.Text()
     def pick_files_result(e: ft.FilePickerResultEvent):
@@ -259,12 +283,23 @@ def main(page: ft.Page):
     
     # sequences count
     def num_sequences_minus_click(e):
-        num_sequences.value = str(int(num_sequences.value) - 1)
+        num_sequences.value = (int(num_sequences.value) - 1)
         num_sequences.update()
+       
+           
+       
+    sequence_list=[]
 
+    seq=0
     def num_sequences_plus_click(e):
-        num_sequences.value = str(int(num_sequences.value) + 1)
+        num_sequences.value = (int(num_sequences.value) + 1)
         num_sequences.update()
+        print(num_sequences.value)
+        
+        if (num_sequences.value > 2):
+            sequence_list.append(sequence_input_add)
+        print(sequence_list)
+
     
     # select sequences
     def select_sequence(e):
@@ -302,6 +337,7 @@ def main(page: ft.Page):
     global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
     local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
 
+
     # Clear Sequences
     def clear_alignments_action(e):
         sequences_alignments_layout.clean()
@@ -331,9 +367,14 @@ def main(page: ft.Page):
         page.update()
         return
 
+    def plot_file():
+        return
+    
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
     show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=lambda _: page.go(f"/matching_matrix/"))
     msa_btn = ft.ElevatedButton("MSA", on_click=msa_action)
+    Plot_file = ft.ElevatedButton("Plot", on_click=plot_file)
+
 
     grading_layout = ft.Row([
         ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
@@ -352,34 +393,39 @@ def main(page: ft.Page):
     file_layout = ft.Row([
         pick_file_btn,
         selected_files,
+        
     ])
     file_layout.visible = False
+    analysis_layout=ft.Row([sum_of_pairs,mutal_information,percent_identity])
 
     text_layout = ft.Column([    
-        sequence_type,
-        ft.Row([
-            ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
-            num_sequences,
-            ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)
-        ]),
-        grading_layout,
-        sequence_input_1,
-        sequence_input_2,
-        ft.Row([
-            global_alignment_btn,
-            local_alignment_btn,
-            clear_alignments_btn,
-            ft.Column
-            ([
-                sequence_select
-            ])
-        ]) 
-        ,
-        ft.Row([
-            score_output,
-            show_matrix_btn
-        ])
-    ])
+                    sequence_type,
+                    ft.Row([
+                        ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
+                        num_sequences,
+                        ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)
+                    ]),
+                    grading_layout,
+                    
+                    sequence_input_1,
+                    sequence_input_2,
+                    #sequence_list[0]
+                    
+                    ft.Row([
+                        global_alignment_btn,
+                        local_alignment_btn,
+                        clear_alignments_btn,
+                        ft.Column
+                        ([
+                            sequence_select
+                        ])
+                    ]) 
+                    ,
+                    ft.Row([
+                        score_output,
+                        show_matrix_btn
+                    ])
+                ])
 
     def route_change(route):
         page.views.clear()
@@ -390,7 +436,8 @@ def main(page: ft.Page):
             ]),
             file_layout,
             text_layout,
-            msa_btn,
+
+            ft.Row([msa_btn,Plot_file]),analysis_layout,
             sequences_alignments_layout
         ]))
         
