@@ -1,22 +1,26 @@
-import matplotlib.pyplot as plt
-import numpy as np
+from math import *
 
-def draw_multiple_sequence_alignment(fig, ax, sequences:dict):
-    """
-    Draw plot for the multiple sequence alignment
-    """
-    ax.set_title("Multiple Sequence Alignment")
-    ax.set_xlabel("Sequence")
-    ax.set_ylabel("Position")
-    ax.set_xticks(np.arange(len(sequences)))
-    ax.set_xticklabels([x for x in sequences.keys()])
-    ax.set_yticks(np.arange(len(sequences[list(sequences.keys())[0]])))
-    ax.set_yticklabels([x for x in sequences[list(sequences.keys())[0]]])
-    ax.imshow(np.array([list(x) for x in sequences.values()]), cmap="Greys")
+def mutual_information(sequences:list, normalized=False):
+    residue_freq = {}
 
-fig, ax = plt.subplots()
-sequences = {
-    1:"AGCAGAGACA",
-    2:"TACTGTATCA"
-}
-draw_multiple_sequence_alignment(fig, ax, sequences)
+    # Iterate over the MSA and count the number of times each residue appears
+    for seq in sequences:
+        for residue in seq:
+            if residue not in residue_freq:
+                residue_freq[residue] = 1
+            else:
+                residue_freq[residue] += 1
+    
+    # Calculate the total number of residues
+    total_residues = sum(residue_freq.values())
+
+    # Calculate the probability of each residue
+    residue_prob = {}
+    for residue in residue_freq:
+        residue_prob[residue] = residue_freq[residue] / total_residues
+
+    return residue_prob
+
+seq = ['AGCAGA-----', 'AGCAGAAAAAG']
+
+print(mutual_information(seq, normalized=True))

@@ -424,7 +424,7 @@ def percent_identity(sequences:list):
 
     return percent_identity
 
-def mutual_information(sequences:list,normalized=False):
+def mutual_information(sequences:list, normalized=False):
     residue_freq = {}
 
     # Iterate over the MSA and count the number of times each residue appears
@@ -454,26 +454,26 @@ def mutual_information(sequences:list,normalized=False):
         
     return mutual_information
 
-def sun_of_pairs(sequences:list): 
+def sum_of_pairs(sequences:list): 
     """
     Calculate the sum of pairs score for a multiple sequence alignment.
     """
-    # Initialize a variable to store the sum of pairs score
-    sum_of_pairs = 0
+    # # Initialize a variable to store the sum of pairs score
+    # sum_of_pairs = 0
 
-    # Define the pair scores
-    pair_scores = {
-        "AA":  5, "AC": -1, "AG": -2, "AT": -1,
-        "CA": -1, "CC": 5, "CG": -3, "CT": -2,
-        "GA": -2, "GC": -3, "GG": 5, "GT": -2,
-        "TA": -1, "TC": -2, "TG": -2, "TT": 5
-    }
+    # # Define the pair scores
+    # pair_scores = {
+    #     "AA":  5, "AC": -1, "AG": -2, "AT": -1,
+    #     "CA": -1, "CC": 5, "CG": -3, "CT": -2,
+    #     "GA": -2, "GC": -3, "GG": 5, "GT": -2,
+    #     "TA": -1, "TC": -2, "TG": -2, "TT": 5
+    # }
 
-    # Iterate over the MSA and calculate the sum of pairs score for each pair of aligned residues
-    for i in range(len(sequences[0])):
-        residue_1 = sequences[0][i]
-        residue_2 = sequences[1][i]
-        sum_of_pairs += pair_scores[residue_1+residue_2]
+    # # Iterate over the MSA and calculate the sum of pairs score for each pair of aligned residues
+    # for i in range(len(sequences[0])):
+    #     residue_1 = sequences[0][i]
+    #     residue_2 = sequences[1][i]
+    #     sum_of_pairs += pair_scores[residue_1+residue_2]
     
-    return sum_of_pairs
-
+    # return sum_of_pairs
+    pass
