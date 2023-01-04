@@ -9,29 +9,20 @@ import numpy as np
 
 from flet import Page
 from flet.matplotlib_chart import MatplotlibChart
+from urllib.parse import urlparse
 
+color_matrix = []
+match_matrix = []
 
-
-
-matplotlib.use("svg")
+fig, ax = plt.subplots()
 def main(page: ft.Page):
     page.title = "Sequence Alignment"
+    youparams = "graph"
     page.theme_mode = ft.ThemeMode.DARK
-
-    #page.padding = 200
-
-    #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
     #page.scroll="always"        
 
-    #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
-
-
     # matrix plot
-    fig, ax = plt.subplots()
-
-    # produce a legend with the unique colors from the scatter
-
     def check_sequence_1(e):
         if not check_sequence(sequence_input_1.value, sequence_type.value):
             sequence_input_1.error_text = f"Invalid {sequence_type.value} Sequence"
@@ -76,11 +67,8 @@ def main(page: ft.Page):
     # num of sequences
     num_sequences=ft.TextField(label="Num of Sequences",value="0", text_align=ft.TextAlign.CENTER, width=200)
 
-    # score
-    score=ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
-
-
-
+    # score output
+    score_output=ft.TextField(label="score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
 
     selected_files = ft.Text()
 
@@ -89,7 +77,6 @@ def main(page: ft.Page):
             ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
         )
         selected_files.update()
-
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
 
     page.overlay.append(pick_files_dialog)
@@ -101,9 +88,12 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_global_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score_result = results["score"]
-        score.value=score_result
-        matching_matrix = results["matrix"]
+        score = results["score"]
+        score_output.value = score
+        global match_matrix
+        global color_matrix
+        match_matrix = results["matrix"]
+        color_matrix = results["color"]
         
         for i in range(0, 101):
             pb.value = i * 0.01
@@ -112,8 +102,7 @@ def main(page: ft.Page):
 
         Sequences.controls.clear()
 
-        max_line_size = 20
-        
+        max_line_size = 20        
         for alignment in optimal_alignments:
             result_1 = alignment[0]
             result_2 = alignment[1]
@@ -163,6 +152,8 @@ def main(page: ft.Page):
                 Sequences.controls.append(ft.Row())
                 Sequences.controls.append(ft.Row())
 
+        global fig, ax
+        draw_match_matrix(fig,ax,sequence_input_1.value, sequence_input_2.value,match_matrix,color_matrix)
         page.update()
     
     # Local alignment
@@ -173,10 +164,13 @@ def main(page: ft.Page):
         Sequences.controls.append(ft.Column([ ft.Text("Process Alignments..."), pb]))
         results = pairwise_local_alignment(sequence_input_1.value, sequence_input_2.value, match.value, mismatch.value, gap.value)
         optimal_alignments = results["alignments"]
-        score_result = results["score"]
-        score.value=score_result
+        score = results["score"]
+        score_output.value = score
 
-        matching_matrix = results["matrix"]
+        global match_matrix
+        global color_matrix
+        match_matrix = results["matrix"]
+        color_matrix = results["color"]
         
         for i in range(0, 101):
             pb.value = i * 0.01
@@ -236,12 +230,14 @@ def main(page: ft.Page):
                 Sequences.controls.append(ft.Row())
                 Sequences.controls.append(ft.Row())
 
+        global fig, ax
+        draw_match_matrix(fig,ax,sequence_input_1.value, sequence_input_2.value,match_matrix,color_matrix)
         page.update() 
 
     # Clear Sequences
     def clear_alignments_action(e):
         Sequences.clean()
-        score.value=None
+        score_output.value=None
         page.update()
    
    # Match count
@@ -253,7 +249,6 @@ def main(page: ft.Page):
         match.value = str(int(match.value) + 1)
         page.update()
     
-
     # MISMATCH COUNT
     def mismatch_minus_click(e):
         mismatch.value = str(int(mismatch.value) - 1)
@@ -281,14 +276,15 @@ def main(page: ft.Page):
         num_sequences.value = str(int(num_sequences.value) + 1)
         num_sequences.update()
     
-
     # select sequences
     def select_sequence(e):
         output_text.value = f"selected sequence is:  {sequence_select.value}"
         page.update()
+ 
     output_text = ft.Text()
     submit_option_btn = ft.ElevatedButton(text="Select", on_click=select_sequence)
-    sequence_select = ft.Dropdown(label="Choose Sequence",
+    sequence_select = ft.Dropdown(
+        label="Choose Sequence",
         width=200,
         height=70,
         options=[
@@ -296,13 +292,10 @@ def main(page: ft.Page):
         ]
     )
 
-    def show_matrix_action():
-
-        return
-
     def select_option(e):
         output_text.value = f"selected option is :  {option_select.value}"
         page.update()
+
     output_text = ft.Text()
     submit_btn = ft.ElevatedButton(text="Select", on_click=select_option)
     option_select = ft.Dropdown(label="Select option",
@@ -314,88 +307,109 @@ def main(page: ft.Page):
         ]
     )
 
-
     global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
     local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
-    show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=show_matrix_action)
-
+    show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=lambda _: page.go(f"/matching_matrix/{youparams}"))
     
-    page.add(  
-        sequence_type,
-        ft.Row(
-            [   
-                ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
-                match,
-                ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
 
-                 ft.IconButton(ft.icons.REMOVE, on_click=mismatch_minus_click),
-                mismatch,
-                ft.IconButton(ft.icons.ADD, on_click=mismatch_plus_click),
+    def route_change(route):
+        page.views.clear()
+        page.views.append(ft.View('/',[
+            sequence_type,
+            ft.Row(
+                [   
+                    ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
+                    match,
+                    ft.IconButton(ft.icons.ADD, on_click=match_plus_click),
 
-                  ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
-                gap,
-                ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
-            ]
-            
-        ),ft.Row([option_select,submit_option_btn]),
+                    ft.IconButton(ft.icons.REMOVE, on_click=mismatch_minus_click),
+                    mismatch,
+                    ft.IconButton(ft.icons.ADD, on_click=mismatch_plus_click),
 
-        ft.Row(
-            [
-                ft.ElevatedButton(
-                    "Pick files",
-                    icon=ft.icons.UPLOAD_FILE,
-                    on_click=lambda _: pick_files_dialog.pick_files(
-                        allow_multiple=True)),
-                          selected_files,
-            ]
-        ),
-         
-        ft.Column
-        (
-            [
-                ft.Row([
-                ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
-                num_sequences,
-                ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)]),
-                sequence_input_1,
-                sequence_input_2,
-                
-                ft.Row
-                (
-
-                [
-
-                global_alignment_btn,
-                local_alignment_btn,
-                clear_alignments_btn,
-
-                ft.Column
-                (
-                        [
-                            sequence_select
-                        ]
-                    
-                )
-                 ,submit_btn
-
+                    ft.IconButton(ft.icons.REMOVE, on_click=gap_minus_click),
+                    gap,
+                    ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
                 ]
-                ) 
-                ,Sequences,
-                ft.Row([score,show_matrix_btn])
-            ]
+                
+            ),ft.Row([option_select,submit_option_btn]),
+
+            ft.Row(
+                [
+                    ft.ElevatedButton(
+                        "Pick files",
+                        icon=ft.icons.UPLOAD_FILE,
+                        on_click=lambda _: pick_files_dialog.pick_files(
+                            allow_multiple=True)),
+                            selected_files,
+                ]
+            ),
             
-        ),
-    
-                 ft.VerticalDivider(),
-                ft.Container(ft.Column([MatplotlibChart(fig,expand=True)])
-,
-                    alignment=ft.alignment.center,
-                    expand=True,
-                ),
+            ft.Column
+            (
+                [
+                    ft.Row([
+                    ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
+                    num_sequences,
+                    ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)]),
+                    sequence_input_1,
+                    sequence_input_2,
+                    
+                    ft.Row
+                    (
+
+                    [
+
+                    global_alignment_btn,
+                    local_alignment_btn,
+                    clear_alignments_btn,
+
+                    ft.Column
+                    (
+                            [
+                                sequence_select
+                            ]
+                        
+                    )
+                    ,submit_btn
+
+                    ]
+                    ) 
+                    ,Sequences,
+                    ft.Row([score_output,show_matrix_btn])
+                ]),
+                    ft.VerticalDivider()
+        ]))
+
+        # GET param from home page
+        param = page.route
+		# THIS IS GET VALUE AFTER /secondpage/THIS RES HERE
+        res = urlparse(param).path.split("/")[-1]
         
-        )
-    
+        matching_matrix_plot = MatplotlibChart(fig,expand=True)
+        exit_matrix_btn = ft.ElevatedButton("Exit", on_click=lambda _: page.go("/"))
+
+        if page.route == f"/matching_matrix/{res}":
+            page.views.append(
+                ft.View(
+				f"/matching_matrix/{res}",
+				[
+                    ft.Container(ft.Column([matching_matrix_plot,exit_matrix_btn]),
+                    alignment=ft.alignment.center,
+                    expand=True)
+                ])
+            )
+
+    page.update()
+    def view_pop(view):
+        page.views.pop()
+        myview = page.views[-1]
+        page.go(myview.route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go(page.route)
+
 ft.app(target=main)
 #ft.app(target=main, view=ft.WEB_BROWSER)
 
