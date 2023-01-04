@@ -22,7 +22,7 @@ def main(page: ft.Page):
 
     #page.theme = ft.Theme(color_scheme_seed="RED")
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    #page.scroll="always"        
+    page.scroll="always"        
 
     #page.vertical_alignment = ft.MainAxisAlignment.SPACE_AROUND
 
@@ -320,8 +320,8 @@ def main(page: ft.Page):
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
     show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=show_matrix_action)
 
-    
-    page.add(  
+    page.add( 
+
         sequence_type,
         ft.Row(
             [   
@@ -377,22 +377,15 @@ def main(page: ft.Page):
                         ]
                     
                 )
-                 ,submit_btn
-
+                 ,submit_btn,
                 ]
                 ) 
                 ,Sequences,
-                ft.Row([score,show_matrix_btn])
+                ft.Row([score,show_matrix_btn]),
+
             ]
             
-        ),
-    
-                 ft.VerticalDivider(),
-                ft.Container(ft.Column([MatplotlibChart(fig,expand=True)])
-,
-                    alignment=ft.alignment.center,
-                    expand=True,
-                ),
+        )
         
         )
     
