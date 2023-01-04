@@ -296,30 +296,33 @@ def main(page: ft.Page):
 
     def select_option(e):
         output_text.value = f"selected option is :  {option_select.value}"
+
+        if (option_select.value=="pick file"):
+            pairwise_layout.visible=False
+        else:
+            pairwise_layout.visible=True
         page.update()
 
     output_text = ft.Text()
-    submit_btn = ft.ElevatedButton(text="Select", on_click=select_option)
+    #submit_btn = ft.ElevatedButton(text="Select")
     option_select = ft.Dropdown(label="Select option",
-        width=200,
-        height=70,
-        options=[
-            ft.dropdown.Option("Enter Sequence"),
-            ft.dropdown.Option("pick file"),
-        ]
+                                on_change=select_option,
+                                width=200,
+                                height=70,
+                                options=[
+                                    ft.dropdown.Option("Enter Sequence"),
+                                    ft.dropdown.Option("pick file"),
+                                ]
     )
-
+    def MSA_action():
+        return
     global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
     local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
     show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=lambda _: page.go(f"/matching_matrix/{youparams}"))
-    
+    MSA = ft.ElevatedButton("MSA", on_click=MSA_action)
 
-    def route_change(route):
-        page.views.clear()
-        page.views.append(ft.View('/',[
-            sequence_type,
-            ft.Row(
+    grading_layout= ft.Row(
                 [   
                     ft.IconButton(ft.icons.REMOVE, on_click=match_minus_click),
                     match,
@@ -334,26 +337,19 @@ def main(page: ft.Page):
                     ft.IconButton(ft.icons.ADD, on_click=gap_plus_click)
                 ]
                 
-            ),ft.Row([option_select,submit_option_btn]),
+            )
 
-            ft.Row(
-                [
-                    ft.ElevatedButton(
-                        "Pick files",
-                        icon=ft.icons.UPLOAD_FILE,
-                        on_click=lambda _: pick_files_dialog.pick_files(
-                            allow_multiple=True)),
-                            selected_files,
-                ]
-            ),
-            
-            ft.Column
-            (
-                [
+    
+    pairwise_layout= ft.Column(
+                [    
+                    sequence_type,
                     ft.Row([
                     ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
                     num_sequences,
+
                     ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)]),
+                                        grading_layout,
+
                     sequence_input_1,
                     sequence_input_2,
                     
@@ -373,14 +369,30 @@ def main(page: ft.Page):
                             ]
                         
                     )
-                    ,submit_btn
+                 
 
                     ]
                     ) 
                     ,Sequences,
                     ft.Row([score_output,show_matrix_btn])
-                ]),
-                    ft.VerticalDivider()
+                ])
+    def route_change(route):
+        page.views.clear()
+        page.views.append(ft.View('/',[
+
+            ft.Row([option_select]),
+            ft.Row(
+                [
+                    ft.ElevatedButton(
+                        "Pick files",
+                        icon=ft.icons.UPLOAD_FILE,
+                        on_click=lambda _: pick_files_dialog.pick_files(
+                            allow_multiple=True)),
+                            selected_files,
+                ]
+            ),pairwise_layout,MSA
+            
+           
         ]))
 
         # GET param from home page
