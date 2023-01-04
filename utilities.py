@@ -9,6 +9,7 @@ from Bio import AlignIO
 import textwrap
 from Bio import SeqIO
 from Bio.Seq import Seq
+from math import *
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
@@ -379,6 +380,19 @@ def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.nda
             loc='center', rowLabels=" " + sequence_a,
             cellColours=colors, colWidths=[0.05 for x in df.columns])
 
+def draw_multiple_sequence_alignment(fig, ax, sequences:dict):
+    """
+    Draw plot for the multiple sequence alignment
+    """
+    ax.set_title("Multiple Sequence Alignment")
+    ax.set_xlabel("Sequence")
+    ax.set_ylabel("Position")
+    ax.set_xticks(np.arange(len(sequences)))
+    ax.set_xticklabels([x for x in sequences.keys()])
+    ax.set_yticks(np.arange(len(sequences[list(sequences.keys())[0]])))
+    ax.set_yticklabels([x for x in sequences[list(sequences.keys())[0]]])
+    ax.imshow(np.array([list(x) for x in sequences.values()]), cmap="Greys")
+
 def multiple_sequence_alignment(path:str=output_file):
     output_location = r"./src/out_file.fasta"
     try:
@@ -393,5 +407,73 @@ def multiple_sequence_alignment(path:str=output_file):
 
     for key, value in sequences_alignment.items():
         sequences[key] = value.seq._data
-    
     return sequences
+
+def percent_identity(sequences:list):
+    identical_pairs = 0
+
+    for i in range(len(sequences[0])):
+        if sequences[0][i] == sequences[1][i]:
+            identical_pairs += 1
+
+    # Calculate the total number of pairs in the multiple sequence alignment
+    total_pairs = len(sequences[0])
+
+    # Calculate the percent identity
+    percent_identity = identical_pairs / total_pairs * 100
+
+    return percent_identity
+
+def mutual_information(sequences:list,normalized=False):
+    residue_freq = {}
+
+    # Iterate over the MSA and count the number of times each residue appears
+    for sequence in sequences:
+        for residue in sequence:
+            if residue in residue_freq:
+                residue_freq[residue] += 1
+            else:
+                residue_freq[residue] = 1
+    total_residues = sum(residue_freq.values())
+
+    # Initialize a variable to store the mutual information
+    mutual_information = 0
+
+    # Iterate over the MSA and calculate the mutual information for each pair of aligned residues
+    for i in range(len(sequences[0])):
+        residue_1 = sequences[0][i]
+        residue_2 = sequences[1][i]
+        p_residue_1_residue_2 = residue_freq[residue_1+residue_2] / total_residues
+        p_residue_1 = residue_freq[residue_1] / total_residues
+        p_residue_2 = residue_freq[residue_2] / total_residues
+        mutual_information += log(p_residue_1_residue_2 / (p_residue_1 * p_residue_2))
+
+    # Normalize the mutual information by the number of residues in the MSA
+    if normalized:
+        mutual_information /= log(total_residues)
+        
+    return mutual_information
+
+def sun_of_pairs(sequences:list): 
+    """
+    Calculate the sum of pairs score for a multiple sequence alignment.
+    """
+    # Initialize a variable to store the sum of pairs score
+    sum_of_pairs = 0
+
+    # Define the pair scores
+    pair_scores = {
+        "AA":  5, "AC": -1, "AG": -2, "AT": -1,
+        "CA": -1, "CC": 5, "CG": -3, "CT": -2,
+        "GA": -2, "GC": -3, "GG": 5, "GT": -2,
+        "TA": -1, "TC": -2, "TG": -2, "TT": 5
+    }
+
+    # Iterate over the MSA and calculate the sum of pairs score for each pair of aligned residues
+    for i in range(len(sequences[0])):
+        residue_1 = sequences[0][i]
+        residue_2 = sequences[1][i]
+        sum_of_pairs += pair_scores[residue_1+residue_2]
+    
+    return sum_of_pairs
+

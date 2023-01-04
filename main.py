@@ -356,30 +356,30 @@ def main(page: ft.Page):
     file_layout.visible = False
 
     text_layout = ft.Column([    
-                    sequence_type,
-                    ft.Row([
-                        ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
-                        num_sequences,
-                        ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)
-                    ]),
-                    grading_layout,
-                    sequence_input_1,
-                    sequence_input_2,
-                    ft.Row([
-                        global_alignment_btn,
-                        local_alignment_btn,
-                        clear_alignments_btn,
-                        ft.Column
-                        ([
-                            sequence_select
-                        ])
-                    ]) 
-                    ,
-                    ft.Row([
-                        score_output,
-                        show_matrix_btn
-                    ])
-                ])
+        sequence_type,
+        ft.Row([
+            ft.IconButton(ft.icons.REMOVE, on_click=num_sequences_minus_click),
+            num_sequences,
+            ft.IconButton(ft.icons.ADD, on_click=num_sequences_plus_click)
+        ]),
+        grading_layout,
+        sequence_input_1,
+        sequence_input_2,
+        ft.Row([
+            global_alignment_btn,
+            local_alignment_btn,
+            clear_alignments_btn,
+            ft.Column
+            ([
+                sequence_select
+            ])
+        ]) 
+        ,
+        ft.Row([
+            score_output,
+            show_matrix_btn
+        ])
+    ])
 
     def route_change(route):
         page.views.clear()
@@ -413,6 +413,7 @@ def main(page: ft.Page):
             )
 
     page.update()
+
     def view_pop(view):
         page.views.pop()
         my_view = page.views[-1]
@@ -421,6 +422,7 @@ def main(page: ft.Page):
     page.on_route_change = route_change
     page.on_view_pop = view_pop
     page.go(page.route)
+
 
 ft.app(target=main)
 # ft.app(target=main, view=ft.WEB_BROWSER)
