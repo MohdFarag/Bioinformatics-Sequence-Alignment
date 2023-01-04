@@ -12,27 +12,29 @@ def main(page: Page):
 		page.views.clear()
 		page.views.append(
 			View(
-				"/",
+				"mm/jjlllllllj",
 				[
 				AppBar(title=Text("Home Page", size=30,
 					color="white"
 					),
-					bgcolor="red500",
+					bgcolor="blue",
 					),
-					# PAGE ROUTE IS PATH YOU URL HERE
+					
+                    # PAGE ROUTE IS PATH YOU URL HERE
 					Text(page.route),
 					ElevatedButton(
 						"Go to Second Page",
 						on_click=lambda _: page.go(f"/secondpage/{youparams}")
 						)
-					]
-					)
+				])
 			)
-		# GET PARAM FROM HOME PAGE
+
+		# GET param from home page
 		param = page.route
 		# THIS IS GET VALUE AFTER /secondpage/THIS RES HERE
 		res = urlparse(param).path.split("/")[-1]
 		print(f"test res is : {res}")
+
 		if page.route == f"/secondpage/{res}":
 			page.views.append(
 				View(
@@ -48,10 +50,7 @@ def main(page: Page):
 						"BACK TO HOME PAGE",
 						on_click=lambda _: page.go("/")
 						)
-
-					]
-					)
-				)
+                        ]))
 	page.update()
 
 	def view_pop(view):

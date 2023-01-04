@@ -349,21 +349,20 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
 
     return results
 
-def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, color_matrix:np.ndarray):
-    n, m = len(sequence_a) + 1, len(sequence_b) + 1
-    
+def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.ndarray, color_matrix:np.ndarray):    
     # Draw the map
-    fig, ax = plt.subplots()
+    ax.clear()
     fig.patch.set_visible(False)
     ax.axis('off')
     ax.axis('tight')
-
+    
+    n, m = len(sequence_a) + 1, len(sequence_b) + 1
     df = pd.DataFrame(match_matrix, columns=list(" " + sequence_b))
     colors = []
-    for i in range(0,m):
+    for j in range(0,n):
         color_row = []
-        for j in range(0,n):
-            if color_matrix[i,j] == 0:
+        for i in range(0,m):
+            if color_matrix[j,i] == 0:
                 color_row.append("w")
             else:
                 color_row.append("g")
@@ -371,7 +370,6 @@ def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, c
         colors.append(color_row)
     
     colors = np.array(colors)
-    print(colors.shape)
 
     # Color the map
     ax.table(cellText=df.values, colLabels=df.columns,
@@ -379,7 +377,6 @@ def draw_match_matrix(sequence_a:str, sequence_b:str, match_matrix:np.ndarray, c
             cellColours=colors, colWidths=[0.05 for x in df.columns])
 
     fig.tight_layout()
-    plt.show()
 
 def multiple_sequence_alignment(path:str, match:int=1, mismatch:int=0, gap:int=-1):
     output_location = r"./src/out_file.fasta"
