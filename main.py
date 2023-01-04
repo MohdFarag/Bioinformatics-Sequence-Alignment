@@ -55,8 +55,8 @@ def main(page: ft.Page):
         sequence_input_2.error_text = None
         page.update()
 
-    sequence_input_1 = ft.TextField(label="Enter Sequence 1",value="AGCAGA", autofocus=True,filled=True,on_change=check_sequence_1)
-    sequence_input_2 = ft.TextField(label="Enter Sequence 2",value="AGCAGAAAAAG" ,autofocus=True,filled=True,on_change=check_sequence_2)
+    sequence_input_1 = ft.TextField(label="Enter Sequence 1",value="AGCAGA", max_length=40, autofocus=True,filled=True,on_change=check_sequence_1)
+    sequence_input_2 = ft.TextField(label="Enter Sequence 2",value="AGCAGAAAAAG", max_length=40 ,autofocus=True,filled=True,on_change=check_sequence_2)
 
     sequences_alignments_layout = ft.Column()
     sequence_type = ft.RadioGroup(
@@ -393,9 +393,6 @@ def main(page: ft.Page):
             msa_btn,
             sequences_alignments_layout
         ]))
-
-        # GET param from home page
-        param = page.route
         
         matching_matrix_plot = MatplotlibChart(fig, expand=True)
         exit_matrix_btn = ft.ElevatedButton("Exit", on_click=lambda _: page.go("/"))
@@ -403,11 +400,15 @@ def main(page: ft.Page):
         if page.route == f"/matching_matrix/":
             page.views.append(
                 ft.View(
-				f"/matching_matrix/",
-				[
-                    ft.Container(ft.Column([matching_matrix_plot,exit_matrix_btn]),
+				f"/matching_matrix/",[
+                    ft.Container(
+                        ft.Column([
+                            matching_matrix_plot,
+                            exit_matrix_btn
+                        ]),
                     alignment=ft.alignment.center,
-                    expand=True)
+                    expand=True
+                    )
                 ])
             )
 
@@ -421,6 +422,6 @@ def main(page: ft.Page):
     page.on_view_pop = view_pop
     page.go(page.route)
 
-# ft.app(target=main)
-ft.app(target=main, view=ft.WEB_BROWSER)
+ft.app(target=main)
+# ft.app(target=main, view=ft.WEB_BROWSER)
 

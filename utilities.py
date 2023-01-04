@@ -379,8 +379,6 @@ def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.nda
             loc='center', rowLabels=" " + sequence_a,
             cellColours=colors, colWidths=[0.05 for x in df.columns])
 
-    fig.tight_layout()
-
 def multiple_sequence_alignment(path:str=output_file):
     output_location = r"./src/out_file.fasta"
     try:
