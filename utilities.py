@@ -8,12 +8,15 @@ from Bio.Align.Applications import ClustalOmegaCommandline
 from Bio import AlignIO
 import textwrap
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
 LETTERS_OF_DNA = ['A','G','T','C','N','X']
 LETTERS_OF_RNA = ['A','G','U','C','N','X']
 LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
+
+output_file = "output.fasta"
 
 # Read fasta file
 def read_fasta(path: str, concat=False):
@@ -39,16 +42,15 @@ def read_fasta(path: str, concat=False):
 
     return sequences_list
 
-def write_fasta(sequences):
+def write_fasta(sequences:dict):
     """
     Takes a dictionary and writes it to a fasta file
     Must specify the filename when calling the function
     """
 
-    output_file_name = open("output.fasta", "w")
-    with open(output_file_name, "w") as outfile:
+    with open(output_file, "w") as outfile:
         for key, value in sequences.items():
-            outfile.write(key + "\n")
+            outfile.write(f">{key}" + "\n")
             outfile.write("\n".join(textwrap.wrap(value, 60)))
             outfile.write("\n")
 
@@ -379,12 +381,19 @@ def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.nda
 
     fig.tight_layout()
 
-def multiple_sequence_alignment(path:str):
+def multiple_sequence_alignment(path:str=output_file):
     output_location = r"./src/out_file.fasta"
-    os.remove(output_location) # Delete file before sequencing
-
-    clustalomega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True)
-    clustalomega_cline()
+    try:
+        os.remove(output_location) # Delete file before sequencing
+    except:
+        pass
+    clustal_omega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True)
+    clustal_omega_cline()
     
+    sequences = dict()
     sequences_alignment = SeqIO.to_dict(SeqIO.parse(output_location, "fasta"))
-    return sequences_alignment
+
+    for key, value in sequences_alignment.items():
+        sequences[key] = value.seq._data
+    
+    return sequences

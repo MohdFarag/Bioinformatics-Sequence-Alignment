@@ -10,8 +10,3 @@ import textwrap
 from Bio import SeqIO
 
 
-
-
-path = "./Data/Group_4.fasta"
-alignment = multiple_sequence_alignment(path)
-print(alignment)
