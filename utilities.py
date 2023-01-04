@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from Bio.Align.Applications import ClustalOmegaCommandline
 from Bio import AlignIO
 import textwrap
+from Bio import SeqIO
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
@@ -378,10 +379,12 @@ def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.nda
 
     fig.tight_layout()
 
-def multiple_sequence_alignment(path:str, match:int=1, mismatch:int=0, gap:int=-1):
+def multiple_sequence_alignment(path:str):
     output_location = r"./src/out_file.fasta"
-    clustalomega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True, match=1, mismatch=0, gap=1)
+    os.remove(output_location) # Delete file before sequencing
+
+    clustalomega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True)
     clustalomega_cline()
-    alignment = AlignIO.read("output_location", "clustalo")
     
-    return alignment
+    sequences_alignment = SeqIO.to_dict(SeqIO.parse(output_location, "fasta"))
+    return sequences_alignment

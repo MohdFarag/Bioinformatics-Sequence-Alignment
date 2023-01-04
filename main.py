@@ -21,7 +21,7 @@ def main(page: ft.Page):
     youparams = "graph"
     page.theme_mode = ft.ThemeMode.DARK
     page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    #page.scroll="always"        
+    page.auto_scroll = True
 
     # matrix plot
     def check_sequence_1(e):
@@ -238,6 +238,7 @@ def main(page: ft.Page):
     # Clear Sequences
     def clear_alignments_action(e):
         Sequences.clean()
+        ax.clear()
         score_output.value=None
         page.update()
    
