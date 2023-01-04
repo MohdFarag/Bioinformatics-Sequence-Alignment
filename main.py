@@ -10,6 +10,7 @@ import numpy as np
 from flet import Page
 from flet.matplotlib_chart import MatplotlibChart
 from urllib.parse import urlparse
+matplotlib.use("svg")
 
 color_matrix = []
 match_matrix = []
