@@ -490,6 +490,8 @@ def main(page: ft.Page):
     page.go(page.route)
     page.update()
 
+
+# RUN
 ft.app(target=main)
 # ft.app(target=main, view=ft.WEB_BROWSER)
 
