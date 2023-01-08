@@ -23,9 +23,9 @@ def main(page: ft.Page):
     # Settings of the page
     page.title = "Sequence Alignment"
     page.theme_mode = ft.ThemeMode.DARK
-    page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    page.scroll = ft.ScrollMode.ALWAYS
-    page.auto_scroll = True
+    # page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
+    page.scroll = ft.ScrollMode.ADAPTIVE
+    # page.auto_scroll = True
 
 
     fig, ax = plt.subplots()
@@ -405,7 +405,7 @@ def main(page: ft.Page):
                         msa_btn,
                         show_matrix_btn,
                         clear_alignments_btn
-                    ]) 
+                    ])
                 ])
 
     # Sequences Alignments place
@@ -463,21 +463,15 @@ def main(page: ft.Page):
     def pages_routes(route):
         page.views.clear()
         # Primary page
-        page.views.append(ft.View('/',primary_page))
+        page.views.append(ft.View('/', primary_page, scroll="adaptive"))
     
         # Plotter page
         if page.route == f"/plotter/":
-            page.views.append(
-                ft.View(
-				f"/plotter/",plotter_page)
-            )
+            page.views.append(ft.View(f"/plotter/", plotter_page))
         
         # Fasta file page
         if page.route == f"/file/":
-            page.views.append(
-                ft.View(
-				f"/file/",file_page)
-            )
+            page.views.append(ft.View(f"/file/", file_page, scroll="adaptive"))
 
     def view_pop(view):
         page.views.pop()
