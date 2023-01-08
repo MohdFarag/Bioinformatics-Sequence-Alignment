@@ -63,6 +63,7 @@ def check_sequence(sequence:str, type:str):
     """
     sequence = sequence.upper() 
     type = type.upper()
+    
     if type == "DNA":
         return is_dna(sequence)
     elif type == "RNA":
@@ -436,58 +437,59 @@ def percent_identity(sequences:list):
     return percent_identity
 
 def mutual_information(sequences:list, normalized=False):
-    residue_freq = {}
+    # residue_freq = {}
 
-    # Iterate over the MSA and count the number of times each residue appears
-    for sequence in sequences:
-        for residue in sequence:
-            if residue in residue_freq:
-                residue_freq[residue] += 1
-            else:
-                residue_freq[residue] = 1
-    total_residues = sum(residue_freq.values())
+    # # Iterate over the MSA and count the number of times each residue appears
+    # for sequence in sequences:
+    #     for residue in sequence:
+    #         if residue in residue_freq:
+    #             residue_freq[residue] += 1
+    #         else:
+    #             residue_freq[residue] = 1
+    # total_residues = sum(residue_freq.values())
 
-    # Initialize a variable to store the mutual information
-    mutual_information = 0
+    # # Initialize a variable to store the mutual information
+    # mutual_information = 0
 
-    # Iterate over the MSA and calculate the mutual information for each pair of aligned residues
-    for i in range(len(sequences[0])):
-        residue_1 = sequences[0][i]
-        residue_2 = sequences[1][i]
-        p_residue_1_residue_2 = residue_freq[residue_1+residue_2] / total_residues
-        p_residue_1 = residue_freq[residue_1] / total_residues
-        p_residue_2 = residue_freq[residue_2] / total_residues
-        mutual_information += log(p_residue_1_residue_2 / (p_residue_1 * p_residue_2))
+    # # Iterate over the MSA and calculate the mutual information for each pair of aligned residues
+    # for i in range(len(sequences[0])):
+    #     residue_1 = sequences[0][i]
+    #     residue_2 = sequences[1][i]
+    #     p_residue_1_residue_2 = residue_freq[residue_1+residue_2] / total_residues
+    #     p_residue_1 = residue_freq[residue_1] / total_residues
+    #     p_residue_2 = residue_freq[residue_2] / total_residues
+    #     mutual_information += log(p_residue_1_residue_2 / (p_residue_1 * p_residue_2))
 
-    # Normalize the mutual information by the number of residues in the MSA
-    if normalized:
-        mutual_information /= log(total_residues)
+    # # Normalize the mutual information by the number of residues in the MSA
+    # if normalized:
+    #     mutual_information /= log(total_residues)
         
-    return mutual_information
+    # return mutual_information
+    return 0
 
 def sum_of_pairs(sequences:list): 
     """
     Calculate the sum of pairs score for a multiple sequence alignment.
     """
-    # Initialize a variable to store the sum of pairs score
-    sum_of_pairs = 0
+    # # Initialize a variable to store the sum of pairs score
+    # sum_of_pairs = 0
 
-    # Define the pair scores
-    pair_scores = {
-        "AA":  5, "AC": -1, "AG": -2, "AT": -1,
-        "CA": -1, "CC": 5, "CG": -3, "CT": -2,
-        "GA": -2, "GC": -3, "GG": 5, "GT": -2,
-        "TA": -1, "TC": -2, "TG": -2, "TT": 5
-    }
+    # # Define the pair scores
+    # pair_scores = {
+    #     "AA":  5, "AC": -1, "AG": -2, "AT": -1,
+    #     "CA": -1, "CC": 5, "CG": -3, "CT": -2,
+    #     "GA": -2, "GC": -3, "GG": 5, "GT": -2,
+    #     "TA": -1, "TC": -2, "TG": -2, "TT": 5
+    # }
 
-    # Iterate over the MSA and calculate the sum of pairs score for each pair of aligned residues
-    for i in range(len(sequences[0])):
-        residue_1 = sequences[0][i]
-        residue_2 = sequences[1][i]
-        sum_of_pairs += pair_scores[residue_1+residue_2]
+    # # Iterate over the MSA and calculate the sum of pairs score for each pair of aligned residues
+    # for i in range(len(sequences[0])):
+    #     residue_1 = sequences[0][i]
+    #     residue_2 = sequences[1][i]
+    #     sum_of_pairs += pair_scores[residue_1+residue_2]
     
-    return sum_of_pairs
-    pass
+    # return sum_of_pairs
+    return 0
 
 def color_of_letter(letter):
     if letter == "A":
