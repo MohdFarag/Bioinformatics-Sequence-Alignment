@@ -1,17 +1,19 @@
 #!/usr/bin/env python
+import os
+
+from Bio import SeqIO
+from Bio.Align.Applications import ClustalOmegaCommandline
+
 import numpy as np
 import pandas as pd
-import os
-import matplotlib
+
 import matplotlib.pyplot as plt
-from Bio.Align.Applications import ClustalOmegaCommandline
-from Bio import AlignIO
-import textwrap
-from Bio import SeqIO
-from Bio.Seq import Seq
-from math import *
 from matplotlib.colors import ListedColormap
 
+from math import *
+import textwrap
+
+## Global variables
 
 # Reference of sequences letters: 
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
@@ -19,7 +21,8 @@ LETTERS_OF_DNA = ['A','G','T','C','N','X']
 LETTERS_OF_RNA = ['A','G','U','C','N','X']
 LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
 
-output_file = "output.fasta"
+OUTPUT_LOC = r"./src/output.fasta"
+INPUT_LOC = r"./src/input.fasta"
 
 # Read fasta file
 def read_fasta(path: str, concat=False):
@@ -51,7 +54,7 @@ def write_fasta(sequences:dict):
     Must specify the filename when calling the function
     """
 
-    with open(output_file, "w") as outfile:
+    with open(INPUT_LOC, "w") as outfile:
         for key, value in sequences.items():
             outfile.write(f">{key}" + "\n")
             outfile.write("\n".join(textwrap.wrap(value, 60)))
@@ -405,17 +408,16 @@ def draw_multiple_sequence_alignment(fig, ax, sequences_dict:dict):
     ax.imshow(sequences, cmap=label2rgb_cmap)
 
 
-def multiple_sequence_alignment(path:str=output_file):
-    output_location = r"./src/out_file.fasta"
+def multiple_sequence_alignment(path:str=INPUT_LOC):
     try:
-        os.remove(output_location) # Delete file before sequencing
+        os.remove(OUTPUT_LOC) # Delete file before sequencing
     except:
         pass
-    clustal_omega_cline = ClustalOmegaCommandline(infile=path, outfile=output_location, verbose=True, auto=True)
+    clustal_omega_cline = ClustalOmegaCommandline(infile=path, outfile=OUTPUT_LOC, verbose=True, auto=True)
     clustal_omega_cline()
     
     sequences = dict()
-    sequences_alignment = SeqIO.to_dict(SeqIO.parse(output_location, "fasta"))
+    sequences_alignment = SeqIO.to_dict(SeqIO.parse(OUTPUT_LOC, "fasta"))
 
     for key, value in sequences_alignment.items():
         sequences[key] = value.seq._data
@@ -507,3 +509,11 @@ def fill_word(word, length):
     while len(word) < length:
         word += " "
     return word
+
+# Transfer list of lists to list of strings
+def lists_to_strings(list_of_lists: list):
+    list_of_strings = []
+    for single_list in list_of_lists:
+        new_string = "".join(single_list)
+        list_of_strings.append(new_string)
+    return list_of_strings
