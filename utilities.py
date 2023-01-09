@@ -1,31 +1,46 @@
 #!/usr/bin/env python
-import os
 
+# Import libraries
+import os
+import textwrap
+# BioPython
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
-
+# Math
 import numpy as np
 import pandas as pd
-
-import matplotlib.pyplot as plt
+# Plotting
 from matplotlib.colors import ListedColormap
 
-from math import *
-import textwrap
+#####################################################################
+# Global variables
+#####################################################################
 
-## Global variables
-
-# Reference of sequences letters: 
+# Reference of sequences letters:
 # http://web.mit.edu/meme_v4.11.4/share/doc/alphabets.html
-LETTERS_OF_DNA = ['A','G','T','C','N','X']
-LETTERS_OF_RNA = ['A','G','U','C','N','X']
-LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
+LETTERS_OF_DNA = ['A', 'G', 'T', 'C', 'N', 'X']
+LETTERS_OF_RNA = ['A', 'G', 'U', 'C', 'N', 'X']
+LETTERS_OF_PROTEIN = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
+                      'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'J']
 
 OUTPUT_LOC = r"./src/output.fasta"
 INPUT_LOC = r"./src/input.fasta"
 
-# Read fasta file
-def read_fasta(path: str, concat=False):
+#####################################################################
+# .fasta file
+#####################################################################
+
+# Read .fasta file
+def read_fasta(path: str, concat: bool = False):
+    """Reads a fasta file and returns a dictionary with the sequences
+
+    Args:
+        path (str): path to the fasta file
+        concat (bool, optional): If you want to concatenate list. Defaults to False.
+
+    Returns:
+        list: list of sequences
+    """
     try:
         with open(path, "r", encoding='utf-8-sig') as file:
             # Read the text from a file
@@ -43,12 +58,13 @@ def read_fasta(path: str, concat=False):
                 sequence = "".join(lines[1:-1])
             else:
                 sequence = lines[1:-1]
-            
+
             sequences_list[lines[0]] = sequence
 
     return sequences_list
 
-def write_fasta(sequences:dict):
+# Write .fasta file
+def write_fasta(sequences: dict):
     """
     Takes a dictionary and writes it to a fasta file
     Must specify the filename when calling the function
@@ -60,53 +76,70 @@ def write_fasta(sequences:dict):
             outfile.write("\n".join(textwrap.wrap(value, 60)))
             outfile.write("\n")
 
-def check_sequence(sequence:str, type:str):
+#####################################################################
+# Check sequence validity
+#####################################################################
+def check_sequence(sequence: str, type_of_sequence: str):
     """
     Check validity of sequences
     """
-    sequence = sequence.upper() 
-    type = type.upper()
-    
-    if type == "DNA":
+    sequence = sequence.upper()
+    type_of_sequence = type_of_sequence.upper()
+
+    if type_of_sequence == "DNA":
         return is_dna(sequence)
-    elif type == "RNA":
+    elif type_of_sequence == "RNA":
         return is_rna(sequence)
-    elif type == "PROTEIN":
+    elif type_of_sequence == "PROTEIN":
         return is_protein(sequence)
 
     return False
 
 def is_dna(sequence):
-    # Valid letters in DNA sequence
+    """
+    Check if sequence is DNA
+    """
+
     for letter in sequence:
         if letter not in LETTERS_OF_DNA:
             return False
     return True
 
 def is_rna(sequence):
-    # Valid letters in RNA sequence
+    """
+    Check if sequence is RNA
+    """
+
     for letter in sequence:
         if letter not in LETTERS_OF_RNA:
             return False
     return True
 
 def is_protein(sequence):
-    # Valid letters in protein sequence
+    """
+    Check if sequence is protein
+    """
+   
     for letter in sequence:
         if letter not in LETTERS_OF_PROTEIN:
             return False
     return True
 
-def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, mismatch:int=0, gap:int=-1):
+#####################################################################
+# Alignments
+#####################################################################
+
+# Pairwise global alignment (Needleman-Wunsch algorithm)
+def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, mismatch: int=0, gap:int=-1):
     """
     The Needleman-Wunsch Algorithm
     ==============================
     This is a dynamic programming algorithm for finding the optimal global alignment of
     two sequences.
-    
+
     Arguments
     -------
-    sequence_a: First sequence 
+    sequence_a: First sequence
     sequence_b: Second sequence
     match: Matching score
     mismatch: Mismatching score
@@ -143,61 +176,61 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
           ['G', 'C', 'A', 'T', 'G', 'C', 'U']]]
     """
 
-    if type(sequence_a) != str:
+    if isinstance(sequence_a, list):
         sequence_a = "".join(sequence_a)
-    
-    if type(sequence_b) != str:
+
+    if isinstance(sequence_b, list):
         sequence_b = "".join(sequence_b)
 
-    if type(match) == str:
+    if isinstance(match, str):
         match = int(match)
 
-    if type(mismatch) == str:
+    if isinstance(mismatch, str):
         mismatch = int(mismatch)
 
-    if type(gap) == str:
+    if isinstance(gap, str):
         gap = int(gap)
 
     # STEP 1: Initialization of matrix
     match_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
     color_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
-    
-    for i in range (1,len(sequence_a)+1):
-        match_matrix[i,0] = match_matrix[i-1,0] + gap
 
-    for j in range (1,len(sequence_b)+1):
-        match_matrix[0,j] = match_matrix[0,j-1] + gap
+    for i in range(1, len(sequence_a)+1):
+        match_matrix[i, 0] = match_matrix[i-1, 0] + gap
+
+    for j in range(1, len(sequence_b)+1):
+        match_matrix[0, j] = match_matrix[0, j-1] + gap
 
     # STEP 2: Filling to the matrix
-    for i in range(1,len(sequence_a)+1):
-        for j in range(1,len(sequence_b)+1):
+    for i in range(1, len(sequence_a)+1):
+        for j in range(1, len(sequence_b)+1):
             arr = []
             if sequence_a[i-1] == sequence_b[j-1]:
-                arr.append(match_matrix[i-1,j-1] + match)
+                arr.append(match_matrix[i-1, j-1] + match)
             elif sequence_a[i-1] != sequence_b[j-1]:
-                arr.append(match_matrix[i-1,j-1] + mismatch)
-            
-            arr.append(match_matrix[i-1,j] + gap)
-            arr.append(match_matrix[i,j-1] + gap)
-            match_matrix[i,j] = max(arr)
+                arr.append(match_matrix[i-1, j-1] + mismatch)
 
-    score = match_matrix[-1,-1]
-    
+            arr.append(match_matrix[i-1, j] + gap)
+            arr.append(match_matrix[i, j-1] + gap)
+            match_matrix[i, j] = max(arr)
+
+    score = match_matrix[-1, -1]
+
     # STEP 3: Backtracing
     alignments = []
     i, j = match_matrix.shape[0] - 1, match_matrix.shape[1] - 1
 
     alignment_a = []
     alignment_b = []
-    while not(i == 0 and j == 0):
+    while not (i == 0 and j == 0):
         letter_a = sequence_a[i-1]
         letter_b = sequence_b[j-1]
-        curr = match_matrix[i,j]
-        color_matrix[i,j] = 1
+        curr = match_matrix[i, j]
+        color_matrix[i, j] = 1
 
-        corner = match_matrix[i-1,j-1]
-        top = match_matrix[i-1,j]
-        left = match_matrix[i,j-1]
+        corner = match_matrix[i-1, j-1]
+        top = match_matrix[i-1, j]
+        left = match_matrix[i, j-1]
         if curr - match == corner and sequence_a[i-1] == sequence_b[j-1] and i != 0 and j != 0:
             alignment_a.append(letter_a)
             alignment_b.append(letter_b)
@@ -217,11 +250,11 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
             alignment_b.append(letter_b)
             j -= 1
 
-    color_matrix[i,j] = 1
-    alignments.append([alignment_a[::-1],alignment_b[::-1]])
+    color_matrix[i, j] = 1
+    alignments.append([alignment_a[::-1], alignment_b[::-1]])
 
     results = {
-        "matrix":match_matrix,
+        "matrix": match_matrix,
         "color": color_matrix,
         "score": score,
         "alignments": alignments
@@ -229,16 +262,16 @@ def pairwise_global_alignment(sequence_a:str, sequence_b:str, match:int=1, misma
 
     return results
 
-def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismatch:int=0, gap:int=-1):
-    """
-    The Smith-Waterman Algorithm
+# Pairwise Local Alignment (smith-waterman algorithm)
+def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismatch: int=0, gap:int=-1):
+    """The Smith-Waterman Algorithm
     ==============================
     This is a dynamic programming algorithm for finding the optimal local alignment of
     two sequences.
-    
+
     Arguments
     -------
-    sequence_a: First sequence 
+    sequence_a: First sequence
     sequence_b: Second sequence
     match: Matching score
     mismatch: Mismatching score
@@ -271,23 +304,23 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
          [0., 0., 1., 0., 1., 1., 3., 2.],
          [0., 0., 0., 2., 1., 1., 2., 3.]]
         >>> results["alignments"]
-        [[['G', 'A', 'T', 'T', 'A', 'C', 'A'], 
+        [[['G', 'A', 'T', 'T', 'A', 'C', 'A'],
           ['G', 'C', 'A', 'T', 'G', 'C', 'U']]]
     """
-    
-    if type(sequence_a) != str:
+
+    if isinstance(sequence_a, list):
         sequence_a = "".join(sequence_a)
-    
-    if type(sequence_b) != str:
+
+    if isinstance(sequence_b, list):
         sequence_b = "".join(sequence_b)
 
-    if type(match) == str:
+    if isinstance(match, str):
         match = int(match)
 
-    if type(mismatch) == str:
+    if isinstance(mismatch, str):
         mismatch = int(mismatch)
 
-    if type(gap) == str:
+    if isinstance(gap, str):
         gap = int(gap)
 
     # STEP 1: Initialization of matrix
@@ -295,34 +328,35 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
     color_matrix = np.zeros((len(sequence_a)+1, len(sequence_b)+1))
 
     # STEP 2: Filling to the matrix
-    for i in range(1,len(sequence_a)+1):
-        for j in range(1,len(sequence_b)+1):
+    for i in range(1, len(sequence_a)+1):
+        for j in range(1, len(sequence_b)+1):
             arr = [0]
             if sequence_a[i-1] == sequence_b[j-1]:
-                arr.append(match_matrix[i-1,j-1] + match)
+                arr.append(match_matrix[i-1, j-1] + match)
             elif sequence_a[i-1] != sequence_b[j-1]:
-                arr.append(match_matrix[i-1,j-1] + mismatch)
-            
-            arr.append(match_matrix[i-1,j] + gap)
-            arr.append(match_matrix[i,j-1] + gap)
-            match_matrix[i,j] = max(arr)
+                arr.append(match_matrix[i-1, j-1] + mismatch)
+
+            arr.append(match_matrix[i-1, j] + gap)
+            arr.append(match_matrix[i, j-1] + gap)
+            match_matrix[i, j] = max(arr)
     score = match_matrix.max()
 
     # STEP 3: Backtracing
     alignments = []
 
-    index_max = np.unravel_index(np.argmax(match_matrix, axis=None), match_matrix.shape)
+    index_max = np.unravel_index(
+        np.argmax(match_matrix, axis=None), match_matrix.shape)
     i, j = index_max[0], index_max[1]
     alignment_a = []
     alignment_b = []
-    
-    while match_matrix[i,j] != 0:
-        curr = match_matrix[i,j]
-        color_matrix[i,j] = 1
 
-        corner = match_matrix[i-1,j-1]
-        top = match_matrix[i-1,j]
-        left = match_matrix[i,j-1]
+    while match_matrix[i, j] != 0:
+        curr = match_matrix[i, j]
+        color_matrix[i, j] = 1
+
+        corner = match_matrix[i-1, j-1]
+        top = match_matrix[i-1, j]
+        left = match_matrix[i, j-1]
 
         letter_a = sequence_a[i-1]
         letter_b = sequence_b[j-1]
@@ -347,11 +381,11 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
             j -= 1
         else:
             break
-    color_matrix[i,j] = 1
-    alignments.append([alignment_a[::-1],alignment_b[::-1]])
+    color_matrix[i, j] = 1
+    alignments.append([alignment_a[::-1], alignment_b[::-1]])
 
     results = {
-        "matrix":match_matrix,
+        "matrix": match_matrix,
         "color": color_matrix,
         "score": score,
         "alignments": alignments
@@ -359,63 +393,25 @@ def pairwise_local_alignment(sequence_a:str, sequence_b:str, match:int=1, mismat
 
     return results
 
-def draw_match_matrix(fig,ax,sequence_a:str, sequence_b:str, match_matrix:np.ndarray, color_matrix:np.ndarray):    
-    # Draw the map
-    ax.clear()
-    fig.patch.set_visible(False)
-    ax.axis('off')
-    ax.axis('tight')
-    
-    n, m = len(sequence_a) + 1, len(sequence_b) + 1
-    df = pd.DataFrame(match_matrix, columns=list(" " + sequence_b))
-    colors = []
-    for j in range(0,n):
-        color_row = []
-        for i in range(0,m):
-            if color_matrix[j,i] == 0:
-                color_row.append("w")
-            else:
-                color_row.append("g")
-
-        colors.append(color_row)
-    
-    colors = np.array(colors)
-
-    # Color the map
-    ax.table(cellText=df.values, colLabels=df.columns,
-            loc='center', rowLabels=" " + sequence_a,
-            cellColours=colors, colWidths=[0.05 for x in df.columns])
-
-def draw_multiple_sequence_alignment(fig, ax, sequences_dict:dict):
-    """
-    Draw plot for the multiple sequence alignment
-    """
-    sequences = np.array([])
-    for _, value in sequences_dict.items():
-        sequences = np.append(sequences,value,axis=1)
-
-    sequences[sequences == 'A'] = "0"
-    sequences[sequences == 'G'] = "1"
-    sequences[sequences == 'T'] = "2"
-    sequences[sequences == 'C'] = "3"
-    sequences[sequences == '_'] = "4"
-    sequences = np.asarray(sequences, dtype=int)
-
-    # Define colormap fpr every number (label2rgb)
-    label2rgb_cmap = ListedColormap(['#FFFFFF', '#000083', '#80FF80', '#830000', '#0080FF'], N=5)
-
-    # Draw matrix
-    ax.imshow(sequences, cmap=label2rgb_cmap)
-
-
+# Multiple sequence alignment
 def multiple_sequence_alignment(path:str=INPUT_LOC):
+    """Generate multiple sequence alignment using Clustal Omega
+
+    Args:
+        path (str, optional): path of desired .fasta file. Defaults to INPUT_LOC.
+
+    Returns:
+        dict: dictionary of sequences
+    """
     try:
-        os.remove(OUTPUT_LOC) # Delete file before sequencing
-    except:
-        pass
-    clustal_omega_cline = ClustalOmegaCommandline(infile=path, outfile=OUTPUT_LOC, verbose=True, auto=True)
+        os.remove(OUTPUT_LOC)  # Delete file before sequencing
+    except Exception as _:
+        print("No file to delete")
+
+    clustal_omega_cline = ClustalOmegaCommandline(
+        infile=path, outfile=OUTPUT_LOC, verbose=True, auto=True)
     clustal_omega_cline()
-    
+
     sequences = dict()
     sequences_alignment = SeqIO.to_dict(SeqIO.parse(OUTPUT_LOC, "fasta"))
 
@@ -423,7 +419,87 @@ def multiple_sequence_alignment(path:str=INPUT_LOC):
         sequences[key] = value.seq._data
     return sequences
 
-def percent_identity(sequences:list):
+#####################################################################
+# Drawing plots
+#####################################################################
+
+# Draw the matrix of alignment
+def draw_match_matrix(fig, axis, sequence_a: str, sequence_b: str, match_matrix: np.ndarray, color_matrix: np.ndarray):
+    """Draw the matrix of alignment
+    """
+    # Draw the map
+    axis.clear()
+
+    rows, cols = len(sequence_a) + 1, len(sequence_b) + 1
+    table = pd.DataFrame(match_matrix, columns=list(" " + sequence_b))
+    colors = []
+    for j in range(0, rows):
+        color_row = []
+        for i in range(0, cols):
+            if color_matrix[j, i] == 0:
+                color_row.append("#171717")
+            else:
+                color_row.append("#00a1c9")
+
+        colors.append(color_row)
+
+    colors = np.array(colors)
+
+    row_label = " " + sequence_a
+    # Color the map
+    axis.table(cellText=table.values,
+               cellColours=colors,
+               cellLoc='center',
+               colWidths=[0.05 for x in table.columns],
+               rowLabels=row_label,
+               rowColours=["#a1a1a1" for _ in row_label],
+               rowLoc='center',
+               colLabels=table.columns,
+               colColours=["#a1a1a1" for _ in table.columns],
+               colLoc='center',
+               loc='center')
+
+    fig.patch.set_visible(False)
+    axis.axis('off')
+    axis.axis('tight')
+
+# Draw the multiple sequence alignment
+def draw_multiple_sequence_alignment(fig, axis, sequences_dict: dict, max_size:int=100):
+    """Draw the multiple sequence alignment
+
+    Args:
+        fig (matplotlib figure): figure of the plot
+        axis (matplotlib axis): axis of the plot
+        sequences_dict (dict): dictionary of sequences
+    """
+    
+    # Draw the map
+    axis.clear()
+      
+    sequences = []
+    for _, sequence in sequences_dict.items():
+        sequences.append(list(sequence[:min(len(sequence),max_size)].decode()))
+   
+    replace_dict = {'A': 0, 'G': 1, 'T': 2, 'C': 3, '-': 4}
+    sequences = replace_repeated_elements(sequences, replace_dict)
+    print(sequences)
+    
+    # Define colormap fpr every number (label2rgb)
+    label2rgb_cmap = ListedColormap(
+        ['#FFFFFF', '#000083', '#80FF80', '#830000', '#0080FF'],
+        N=5
+    )
+
+    # Draw matrix
+    axis.imshow(sequences, cmap=label2rgb_cmap)
+    fig.savefig("multiple_sequence_alignment.png")
+
+#####################################################################
+# Metrics for alignment
+#####################################################################
+
+# Calculating Percent identity
+def percent_identity(sequences: list):
     identical_pairs = 0
 
     for i in range(len(sequences[0])):
@@ -438,7 +514,10 @@ def percent_identity(sequences:list):
 
     return percent_identity
 
-def mutual_information(sequences:list, normalized=False):
+# Calculating Mutual information
+def mutual_information(sequences: list, normalized=False):
+    sequences += sequences
+    normalized += normalized
     # residue_freq = {}
 
     # # Iterate over the MSA and count the number of times each residue appears
@@ -465,14 +544,17 @@ def mutual_information(sequences:list, normalized=False):
     # # Normalize the mutual information by the number of residues in the MSA
     # if normalized:
     #     mutual_information /= log(total_residues)
-        
+
     # return mutual_information
     return 0
 
-def sum_of_pairs(sequences:list): 
+# Calculating Sum of pairs
+def sum_of_pairs(sequences: list):
     """
     Calculate the sum of pairs score for a multiple sequence alignment.
     """
+    
+    sequences += sequences
     # # Initialize a variable to store the sum of pairs score
     # sum_of_pairs = 0
 
@@ -489,10 +571,15 @@ def sum_of_pairs(sequences:list):
     #     residue_1 = sequences[0][i]
     #     residue_2 = sequences[1][i]
     #     sum_of_pairs += pair_scores[residue_1+residue_2]
-    
+
     # return sum_of_pairs
     return 0
 
+#####################################################################
+# Other functions
+#####################################################################
+
+# Set colors of letters in multiple sequence
 def color_of_letter(letter):
     if letter == "A":
         return "red"
@@ -505,6 +592,7 @@ def color_of_letter(letter):
     else:
         return "black"
 
+# Fill word with spaces
 def fill_word(word, length):
     while len(word) < length:
         word += " "
@@ -517,3 +605,20 @@ def lists_to_strings(list_of_lists: list):
         new_string = "".join(single_list)
         list_of_strings.append(new_string)
     return list_of_strings
+
+# Replace repeated element in 2d list
+def replace_repeated_elements(list_of_lists: list, replace_dict: dict):
+    """Replace repeated elements by dictionary
+
+    Args:
+        list_of_lists (list): 2d list
+        replace_dict (dict): Map of replacing elements
+
+    Returns:
+        list: modified list
+    """
+    
+    new_list = []
+    for single_list in list_of_lists:
+        new_list.append([replace_dict[element] for element in single_list])
+    return new_list

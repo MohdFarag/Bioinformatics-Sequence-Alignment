@@ -1,51 +1,85 @@
-import flet as ft
-from fletAdditions import *
+"""
+Sequence Alignment - Bioinformatics Project
+-----------------------------
+    Authors:  Mohamed Ahmed Abdullah & Ismail Tawfik
+    Date: 9/1/2023
+    Version: 1.0.0
+    Status:  Development
+    Description:
+        GUI for software that can do global & local & multiple sequence alignment.
+    Requirements:
+        Python 3.9.7
+        flet 0.1.0
+        matplotlib 3.4.3
+        numpy 1.21.2
+        bioPython 1.79
+"""
 
-from utilities import *
-from math import *
+from utilities import (
+    write_fasta,
+    multiple_sequence_alignment,
+    pairwise_global_alignment,
+    pairwise_local_alignment,
+    draw_match_matrix,
+    draw_multiple_sequence_alignment,
+    check_sequence,
+    lists_to_strings,
+    fill_word,
+    color_of_letter,
+    percent_identity,
+    mutual_information,
+    sum_of_pairs,
+    INPUT_LOC)
+
+# Imports
+from math import ceil
 from time import sleep
 
+# matplotlib imports
 import matplotlib
 import matplotlib.pyplot as plt
 from flet.matplotlib_chart import MatplotlibChart
 matplotlib.use("svg")
+plt.style.use('dark_background')
+
+# flet imports
+import flet as ft
 
 # Global variables
 PAIRWISE_LINE_SIZE = 20
 MULTIPLE_LINE_SIZE = 40
 
-color_matrix = []
-match_matrix = []
-
-file_path = None
+COLOR_MATRIX = []
+MATCH_MATRIX = []
+FILE_PATH = None
 
 def main(page: ft.Page):
     # Settings of the page
     page.title = "Sequence Alignment"
     page.theme_mode = ft.ThemeMode.DARK
-    # page.vertical_alignment = ft.MainAxisAlignment.SPACE_EVENLY
-    page.scroll = ft.ScrollMode.ADAPTIVE
-    # page.auto_scroll = True
 
-
-    fig, ax = plt.subplots()
+    fig, axis = plt.subplots()
 
     # Progress bar download
     def create_progress_bar(label="Processing", width=500, time=101, sleep_time=0.01):
-        pb = ft.ProgressBar(width=width)
-        sequences_alignments_layout.controls.append(ft.Column([ ft.Text(f"{label}..."), pb]))
+        progress_bar = ft.ProgressBar(width=width)
+        sequences_alignments_layout.controls.append(ft.Column(
+            [ft.Text(f"{label}..."),
+             progress_bar]
+        ))
+        # Timer
         for i in range(0, time):
-            pb.value = i * 0.01
+            progress_bar.value = i * 0.01
             sleep(sleep_time)
             page.update()
 
     # Counter Button
     def create_counter_button(label, default=0, width=100, height=100, plus_on_click=None, minus_on_click=None):
-        def minus_click(e):
+        def minus_click(_):
             text_field.value = str(int(text_field.value) - 1)
             page.update()
 
-        def plus_click(e):
+        def plus_click(_):
             text_field.value = str(int(text_field.value) + 1)
             page.update()
 
@@ -69,7 +103,7 @@ def main(page: ft.Page):
 
     # Sequence input
     def add_sequence_input():
-        def check_sequence_of_input(e):
+        def check_sequence_of_input(_):
             if not check_sequence(sequence_input.value, sequence_type.value):
                 sequence_input.error_text = f"Invalid {sequence_type.value} Sequence"
                 global_alignment_btn.disabled = True
@@ -84,15 +118,15 @@ def main(page: ft.Page):
             sequence_input.error_text = None
             page.update()
 
-        sequence_input = ft.TextField(label=f"Enter Sequence {len(sequences_inputs_layout.controls)+1}",value="", max_length=40, filled=True,on_change=check_sequence_of_input)
+        sequence_input = ft.TextField(label=f"Enter Sequence {len(sequences_inputs_layout.controls)+1}",value="", max_length=25, filled=True,on_change=check_sequence_of_input)
         sequences_inputs_layout.controls.append(sequence_input)
         page.update()
 
         return sequence_input
 
     # Mode select file input or text input
-    def select_mode(e):
-        if (mode_select.value == "Pick .fasta file"):
+    def select_mode(_):
+        if mode_select.value == "Pick .fasta file":
             page.go("/file/")
         else:
             page.go("/")
@@ -107,7 +141,8 @@ def main(page: ft.Page):
         value="Enter Text Input",
         options=[
             ft.dropdown.Option("Enter Text Input"),
-            ft.dropdown.Option("Pick .fasta file")]
+            ft.dropdown.Option("Pick .fasta file")
+        ]
     )
 
     sequence_type = ft.RadioGroup(
@@ -118,7 +153,7 @@ def main(page: ft.Page):
         ],
         vertical_alignment="center"),
         value="DNA")
-        
+    
     # Grading penalties
     match_div, match_input = create_counter_button("MATCH", 2, 100, 100)
     mismatch_div, mismatch_input = create_counter_button("MISMATCH", -2, 100, 100)
@@ -130,7 +165,7 @@ def main(page: ft.Page):
         gap_div
     ])
 
-    def num_sequences_minus_click(e):       
+    def num_sequences_minus_click(_):
         if int(number_of_sequences_input.value) - 1 > 2:
             msa_btn.visible = True
             global_alignment_btn.visible = False
@@ -141,14 +176,14 @@ def main(page: ft.Page):
             local_alignment_btn.visible = True
         page.update()
 
-        if(int(number_of_sequences_input.value) - 1 < 2):
+        if int(number_of_sequences_input.value) - 1 < 2:
             return
 
         number_of_sequences_input.value = str(int(number_of_sequences_input.value) - 1)
         sequences_inputs_layout.controls.pop()
         page.update()
-    
-    def num_sequences_plus_click(e):
+   
+    def num_sequences_plus_click(_):
         number_of_sequences_input.value = str(int(number_of_sequences_input.value) + 1)
 
         if int(number_of_sequences_input.value) + 1 > 2:
@@ -170,34 +205,34 @@ def main(page: ft.Page):
     score_output = ft.TextField(label="Score",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
 
     # Metrics of alignment
-    sum_of_pairs_input = ft.TextField(label="Sum Of Pairs",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
-    mutual_information_input = ft.TextField(label="Mutual Information",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
-    percent_identity_input = ft.TextField(label="percent Identity",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+    sum_of_pairs_output = ft.TextField(label="Sum Of Pairs",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+    mutual_information_output = ft.TextField(label="Mutual Information",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
+    percent_identity_output = ft.TextField(label="percent Identity",text_align=ft.TextAlign.CENTER, width=100,disabled=True,filled=True)
 
-    # Analysis outputs layout 
+    # Analysis outputs layout
     analysis_layout = ft.Row([
         score_output,
-        sum_of_pairs_input,
-        mutual_information_input,
-        percent_identity_input
+        sum_of_pairs_output,
+        mutual_information_output,
+        percent_identity_output
     ])
 
     # Global Alignment
-    def global_alignment_action(e):
+    def global_alignment_action(_):
         if sequence_input_1.value == "" or sequence_input_2.value == "":
             return
     
         sequences_alignments_layout.controls.clear()
 
-        global match_matrix
-        global color_matrix    
+        global MATCH_MATRIX
+        global COLOR_MATRIX    
         results = pairwise_global_alignment(sequence_input_1.value, sequence_input_2.value, match_input.value, mismatch_input.value, gap_input.value)
         print(results)
 
         optimal_alignments = results["alignments"]
         score = results["score"]
-        match_matrix = results["matrix"]
-        color_matrix = results["color"]
+        MATCH_MATRIX = results["matrix"]
+        COLOR_MATRIX = results["color"]
 
         create_progress_bar()
         display_pairwise_alignments(optimal_alignments)
@@ -207,27 +242,27 @@ def main(page: ft.Page):
 
         alignments = lists_to_strings(optimal_alignments[0])
         score_output.value = score
-        percent_identity_input.value = percent_identity(alignments)
-        sum_of_pairs_input.value = sum_of_pairs(alignments)
-        mutual_information_input.value = mutual_information(alignments)
+        percent_identity_output.value = percent_identity(alignments)
+        sum_of_pairs_output.value = sum_of_pairs(alignments)
+        mutual_information_output.value = mutual_information(alignments)
         page.update()
     
     # Local Alignment
-    def local_alignment_action(e):
+    def local_alignment_action(_):
         if sequence_input_1.value == "" or sequence_input_2.value == "":
             return
 
         sequences_alignments_layout.controls.clear()
 
-        global match_matrix
-        global color_matrix
+        global MATCH_MATRIX
+        global COLOR_MATRIX
         results = pairwise_local_alignment(sequence_input_1.value, sequence_input_2.value, match_input.value, mismatch_input.value, gap_input.value)
         print(results)
 
         optimal_alignments = results["alignments"]
         score = results["score"]
-        match_matrix = results["matrix"]
-        color_matrix = results["color"]
+        MATCH_MATRIX = results["matrix"]
+        COLOR_MATRIX = results["color"]
         
         create_progress_bar()
         display_pairwise_alignments(optimal_alignments)
@@ -237,9 +272,9 @@ def main(page: ft.Page):
 
         alignments = lists_to_strings(optimal_alignments[0])
         score_output.value = score
-        percent_identity_input.value = percent_identity(alignments)
-        sum_of_pairs_input.value = sum_of_pairs(alignments)
-        mutual_information_input.value = mutual_information(alignments)
+        percent_identity_output.value = percent_identity(alignments)
+        sum_of_pairs_output.value = sum_of_pairs(alignments)
+        mutual_information_output.value = mutual_information(alignments)
 
         page.update() 
 
@@ -298,15 +333,18 @@ def main(page: ft.Page):
                 sequences_alignments_layout.controls.append(ft.Row(sequence_2))
                 sequences_alignments_layout.controls.append(ft.Row([ft.Text(" ")]))
 
-        draw_match_matrix(fig, ax, sequence_input_1.value, sequence_input_2.value, match_matrix, color_matrix)
+        draw_match_matrix(fig, axis, sequence_input_1.value, sequence_input_2.value, MATCH_MATRIX, COLOR_MATRIX)
   
     global_alignment_btn = ft.ElevatedButton("Global Alignment", on_click=global_alignment_action)
     local_alignment_btn = ft.ElevatedButton("Local Alignment", on_click=local_alignment_action)
 
     # Multiple Sequence Alignment
-    def multiple_sequence_alignment_action(e):
-        global file_path
-        if (mode_select.value == "Enter Text Input"): 
+    def multiple_sequence_alignment_action(_):
+        sequences_alignments_layout.controls.clear()
+
+        # Generate a fasta file from the input sequences
+        global FILE_PATH
+        if (mode_select.value == "Enter Text Input"):
             i = 0
             sequences = dict()
             for sequence_input in sequences_inputs_layout.controls:
@@ -317,20 +355,20 @@ def main(page: ft.Page):
                     i += 1
 
             write_fasta(sequences)
-            file_path = INPUT_LOC
-        
-        if file_path == None:
+            FILE_PATH = INPUT_LOC
+                 
+        if FILE_PATH is None:
             return
 
-        results = multiple_sequence_alignment(file_path)
+        results = multiple_sequence_alignment(FILE_PATH)
 
         create_progress_bar()
         display_multiple_alignments(results)
-        
+       
         score_output.value = None
-        percent_identity_input.value = percent_identity(list(results.values()))
-        sum_of_pairs_input.value = sum_of_pairs(list(results.values()))
-        mutual_information_input.value = mutual_information(list(results.values()))
+        percent_identity_output.value = percent_identity(list(results.values()))
+        sum_of_pairs_output.value = sum_of_pairs(list(results.values()))
+        mutual_information_output.value = mutual_information(list(results.values()))
 
         page.update()
 
@@ -343,20 +381,17 @@ def main(page: ft.Page):
         number_of_lines = ceil((length_of_sequence/ MULTIPLE_LINE_SIZE))
 
         # Draw MSA
-        # try:
-        #     draw_multiple_sequence_alignment(fig, ax, optimal_alignments)
-        # except:
-        #     pass
+        draw_multiple_sequence_alignment(fig, axis, optimal_alignments)
 
         for k in range(number_of_lines):
             start_index = k*line_size
-            end_index = (k+1)*line_size 
+            end_index = (k+1)*line_size
             if k == number_of_lines - 1 and k != 0 :
                 end_index -= line_size - last_line_mod
             
-            for id, alignment in optimal_alignments.items():
+            for sequence_id, alignment in optimal_alignments.items():
                 alignment = alignment.decode()
-                sequence_line = [ft.Text(fill_word(id,30),width=150)]
+                sequence_line = [ft.Text(fill_word(sequence_id,30),width=150)]
                 for i in range(start_index,end_index):
                     if alignment[i] == "-":
                         size = 30
@@ -380,21 +415,26 @@ def main(page: ft.Page):
     msa_btn = ft.ElevatedButton("MSA", on_click=multiple_sequence_alignment_action)
 
     # Clear Sequences
-    def clear_alignments_action(e):
-        sequences_alignments_layout.clean()
+    def clear_alignments_action(_):
         score_output.value = None
-        ax.clear()
-
+        percent_identity_output.value = None
+        sum_of_pairs_output.value = None
+        mutual_information_output.value = None
+        
+        sequences_alignments_layout.clean()
+        axis.clear()
+        
         page.update()
+        
     clear_alignments_btn = ft.ElevatedButton("Clear", on_click=clear_alignments_action)
-    show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=lambda _: page.go(f"/plotter/"))
+    show_matrix_btn = ft.ElevatedButton("Show Matrix", on_click=lambda _: page.go(r"/plotter/"))
 
     sequences_inputs_layout = ft.Column([])
     # Default inputs
     sequence_input_1 = add_sequence_input()
     sequence_input_2 = add_sequence_input()
-   
-    sequence_text_layout = ft.Column([    
+  
+    sequence_text_layout = ft.Column([
                     sequence_type,
                     number_of_sequences_div,
                     grading_layout,
@@ -423,8 +463,8 @@ def main(page: ft.Page):
     def pick_files_result(e: ft.FilePickerResultEvent):
         selected_files.value = (", ".join(map(lambda f: f.name, e.files)) if e.files else "Choose file!")
 
-        global file_path
-        file_path = (", ".join(map(lambda f: f.path, e.files)) if e.files else None)
+        global FILE_PATH
+        FILE_PATH = (", ".join(map(lambda f: f.path, e.files)) if e.files else None)
         selected_files.update()    
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
     page.overlay.append(pick_files_dialog)
@@ -434,15 +474,15 @@ def main(page: ft.Page):
         on_click=lambda _: pick_files_dialog.pick_files(allow_multiple=False),
     )
 
-    plot_btn = ft.ElevatedButton("Plot", on_click=lambda _: page.go(f"/plotter/"))
+    plot_btn = ft.ElevatedButton("Plot", on_click=lambda _: page.go(r"/plotter/"))
            
     file_page = [
         mode_select,
         ft.Row([
             pick_file_btn,
             selected_files,
+            msa_btn,
             plot_btn,
-            msa_btn
         ]),
         sequences_alignments_layout
     ]
@@ -463,17 +503,17 @@ def main(page: ft.Page):
     def pages_routes(route):
         page.views.clear()
         # Primary page
-        page.views.append(ft.View('/', primary_page, scroll="adaptive"))
+        page.views.append(ft.View('/', primary_page, scroll="adaptive", vertical_alignment = ft.MainAxisAlignment.CENTER))
     
         # Plotter page
-        if page.route == f"/plotter/":
-            page.views.append(ft.View(f"/plotter/", plotter_page))
+        if page.route == r"/plotter/":
+            page.views.append(ft.View(page.route, plotter_page))
         
         # Fasta file page
-        if page.route == f"/file/":
-            page.views.append(ft.View(f"/file/", file_page, scroll="adaptive"))
+        if page.route == r"/file/":
+            page.views.append(ft.View(page.route, file_page, scroll="adaptive"))
 
-    def view_pop(view):
+    def view_pop(_):
         page.views.pop()
         my_view = page.views[-1]
         page.go(my_view.route)
@@ -483,7 +523,6 @@ def main(page: ft.Page):
 
     page.go(page.route)
     page.update()
-
 
 # RUN
 ft.app(target=main)
