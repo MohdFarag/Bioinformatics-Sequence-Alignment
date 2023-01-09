@@ -1,6 +1,6 @@
 # Bioinformatics Sequence Alignment
 
-GUI for software that can do global pairwise, local pairwise, multiple sequence Alignment.
+GUI for software that can do global & local & multiple sequence alignment.
 
 ## Tasks
 
@@ -11,3 +11,7 @@ GUI for software that can do global pairwise, local pairwise, multiple sequence 
 - Fix value of mode to be based on route
 
 ## Preview
+
+## References
+
+- <https://flet.dev/docs/controls/page>
